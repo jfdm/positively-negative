@@ -1,0 +1,5 @@
+package posneg
+
+modules = Decidable.Positive
+
+-- [ EOF ]
