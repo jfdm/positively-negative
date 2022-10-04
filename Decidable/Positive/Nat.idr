@@ -7,9 +7,8 @@ import public Decidable.Positive
 %default total
 
 export
-Show (Nat.LTE x y) where
-  show LTEZero = "LZ"
-  show (LTESucc z) = "(LS \{show z})"
+{x,y : Nat} -> Show (Nat.LTE x y) where
+  show {x} {y} _ = "(\{show x} <= \{show y})"
 
 namespace GreaterThan
 

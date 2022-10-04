@@ -3,11 +3,11 @@ module Decidable.Positive
 %default total
 
 public export
-data Decidable : Type where
-  D : (  positive  : Type)
-   -> (  negative  : Type)
-   -> (0 cancelled : positive -> negative -> Void)
-                  -> Decidable
+record Decidable where
+  constructor D
+  positive : Type
+  negative : Type
+  0 cancelled : positive -> negative -> Void
 
 public export
 Show : Decidable -> Type
@@ -65,7 +65,7 @@ export
 export
 polarity' : {d   : Decidable}
          -> (res : Positive.Dec d)
-                -> Either (Neg d) (Pos d)
+                -> Either (negative d) (positive d)
 polarity' {d = (D positive negative cancelled)} (Left x)
   = Left x
 polarity' {d = (D positive negative cancelled)} (Right x)
