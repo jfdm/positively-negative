@@ -6,6 +6,40 @@ import public Decidable.Positive
 
 %default total
 
+public export
+data IsZero : Nat -> Type where
+  ItIsZero : IsZero Z
+
+namespace IsZero
+
+  prf : IsZero n -> IsSucc n -> Void
+  prf ItIsZero ItIsSucc impossible
+
+  public export
+  ISZERO : Nat -> Decidable
+  ISZERO n
+    = D (IsZero n) (IsSucc n) prf
+
+  export
+  isZero : (n : Nat) -> Positive.Dec (ISZERO n)
+  isZero 0
+    = Right ItIsZero
+  isZero (S k)
+    = Left ItIsSucc
+
+namespace IsSucc
+
+  public export
+  ISSUCC : Nat -> Decidable
+  ISSUCC n
+    = D (IsSucc n) (IsZero n) (negSym (cancelled (ISZERO n)))
+
+  export
+  isSucc : (n : Nat) -> Positive.Dec (ISSUCC n)
+  isSucc n with (IsZero.isZero n)
+    isSucc n | (Left x) = Right x
+    isSucc n | (Right x) = Left x
+
 export
 {x,y : Nat} -> Show (Nat.LTE x y) where
   show {x} {y} _ = "(\{show x} <= \{show y})"
