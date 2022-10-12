@@ -10,8 +10,8 @@ import public Decidable.Positive.List.Common
 public export
 0
 prf : {xs  : List type}
-   -> All p Decidable.positive Decidable.negative xs
-   -> Any p Decidable.positive Decidable.negative xs
+   -> All p Positive Negative xs
+   -> Any p Positive Negative xs
    -> Void
 prf Empty (Here x) impossible
 prf Empty (There x rest) impossible
@@ -28,8 +28,8 @@ prf {p} {xs=(x::xs)} (Extend pos rest) any with (any)
 public export
 ALL : (p : type -> Decidable) -> (xs : List type) -> Decidable
 ALL p xs
-  = D (All     p Decidable.positive Decidable.negative xs)
-      (Any     p Decidable.positive Decidable.negative xs)
+  = D (All     p Positive Negative xs)
+      (Any     p Positive Negative xs)
       (All.prf)
 
 export
@@ -51,8 +51,8 @@ all {p} f (x :: xs) with (p x)
           = Right (Extend y z)
 
 export
-showALL : (f : {x:_} -> positive (p x) -> String)
-       -> (g : {x:_} -> negative (p x) -> String)
+showALL : (f : {x:_} -> Positive (p x) -> String)
+       -> (g : {x:_} -> Negative (p x) -> String)
        -> Positive.Dec (ALL p xs)
        -> String
 showALL f g (Left x)

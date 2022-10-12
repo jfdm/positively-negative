@@ -32,7 +32,7 @@ namespace IsSucc
   public export
   ISSUCC : Nat -> Decidable
   ISSUCC n
-    = D (IsSucc n) (IsZero n) (negSym (cancelled (ISZERO n)))
+    = D (IsSucc n) (IsZero n) (negSym (Cancelled (ISZERO n)))
 
   export
   isSucc : (n : Nat) -> Positive.Dec (ISSUCC n)

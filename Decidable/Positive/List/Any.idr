@@ -7,8 +7,8 @@ import public Decidable.Positive.List.All
 
 0
 prf : {xs  : List type}
-   -> Any p Decidable.negative Decidable.positive xs
-   -> All p Decidable.negative Decidable.positive xs
+   -> Any p Negative Positive xs
+   -> All p Negative Positive xs
    -> Void
 prf {p} {xs=x::xs} (Here neg) (Extend pos rest) with (p x)
   prf {p = p} {xs=x::xs} (Here neg) (Extend pos rest) | (D positive negative cancelled)
@@ -22,8 +22,8 @@ prf {p} {xs=x::xs} (There pos rest) (Extend neg later) with (p x)
 export
 ANY : (p : type -> Decidable) -> (xs : List type) -> Decidable
 ANY p xs
-  = D (Any     p Decidable.negative Decidable.positive xs)
-      (All     p Decidable.negative Decidable.positive xs)
+  = D (Any     p Negative Positive xs)
+      (All     p Negative Positive xs)
       (Any.prf)
 
 export
@@ -43,8 +43,8 @@ any {p} f (x :: xs) with (p x)
       any {p = p} f (x :: xs) | (D positive negative cancelled) | res | (Right y) = Right (Here y)
 
 export
-showANY : (f : {x : _} -> positive (p x) -> String)
-       -> (g : {x : _} -> negative (p x) -> String)
+showANY : (f : {x : _} -> Positive (p x) -> String)
+       -> (g : {x : _} -> Negative (p x) -> String)
        -> Positive.Dec (ANY p xs)
        -> String
 showANY f g (Left x) = "(No (All) \{showAll g x})"
@@ -54,16 +54,16 @@ namespace Wrong
 
   0
   prf : {xs  : List type}
-     -> Any p Decidable.positive Decidable.negative xs
-     -> All p Decidable.positive Decidable.negative xs
+     -> Any p Positive Negative xs
+     -> All p Positive Negative xs
      -> Void
   prf x y = All.prf y x
 
   export
   ANY : (p : type -> Decidable) -> (xs : List type) -> Decidable
   ANY p xs
-    = D (Any     p Decidable.positive Decidable.negative xs)
-        (All     p Decidable.positive Decidable.negative xs)
+    = D (Any     p Positive Negative xs)
+        (All     p Positive Negative xs)
         (Any.Wrong.prf)
 
   export
@@ -78,8 +78,8 @@ namespace Wrong
       = Left x
 
   export
-  showANY : (f : {x : _} -> positive (p x) -> String)
-         -> (g : {x : _} -> negative (p x) -> String)
+  showANY : (f : {x : _} -> Positive (p x) -> String)
+         -> (g : {x : _} -> Negative (p x) -> String)
          -> Positive.Dec (Wrong.ANY p xs)
          -> String
   showANY f g (Left x) = "(No (All) \{showAll f x})"

@@ -7,10 +7,10 @@ import public Decidable.Positive
 
 public export
 data Elem : (x : type) -> (xs : List type) -> Type where
-  H : (prf : Pos (EQ x y))
+  H : (prf : Positive (EQ x y))
           -> Elem x (y::xs)
 
-  T : (no    : Neg (EQ x y))
+  T : (no    : Negative (EQ x y))
    -> (later : Elem x xs)
             -> Elem x (y::xs)
 
@@ -24,7 +24,7 @@ Show (Elem x xs) where
 public export
 data ElemNot : (x : type) -> (xs : List type) -> Type where
   Empty : ElemNot x Nil
-  TNot  : (prf   : Neg (EQ x  y))
+  TNot  : (prf   : Negative (EQ x  y))
        -> (later : ElemNot x     xs)
                 -> ElemNot x (y::xs)
 
