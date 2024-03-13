@@ -77,4 +77,27 @@ namespace Equality
   interface DecEq type where
     decEq : (x,y : type)
                 -> Positive.Dec (EQ x y)
+
+  namespace Positive
+    public export
+    interface DecEqPos type where
+      DECEQpos : (x,y : type) -> Type
+      DECEQneg : (x,y : type) -> Type
+      0 DECEQprf : forall x, y . DECEQpos x y -> DECEQneg x y -> Void
+
+      DECEQ : (x,y : type) -> Decidable
+      DECEQ x y = D (DECEQpos x y) (DECEQneg x y) DECEQprf
+
+      DECEQIN : (x,y : type) -> Decidable
+      DECEQIN x y = D (DECEQneg x y) (DECEQpos x y) (\x,y => DECEQprf y x)
+
+      0 DECEQeq : forall x, y . DECEQpos x y -> Equal x y
+      0 DECEQeqn : forall x, y . DECEQpos x y -> DECEQneg x y -> Not (Equal x y)
+
+      decEqPOS : (x,y : type)
+                     -> Positive.Dec (DECEQ x y)
+
+      decEqPOSNot : (x,y : type)
+                        -> Positive.Dec (DECEQIN x y)
+
 -- [ EOF ]

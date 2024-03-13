@@ -2,4 +2,12 @@ package posneg
 
 modules = Decidable.Positive
 
+        , Decidable.Positive.So
+        , Decidable.Positive.Nat
+
+        , Decidable.Positive.List.Common
+        , Decidable.Positive.List.Any
+        , Decidable.Positive.List.All
+        , Decidable.Positive.List.Elem
+
 -- [ EOF ]
