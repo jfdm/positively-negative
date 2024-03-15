@@ -3,6 +3,7 @@ module Decidable.Positive.Nat
 import public Data.Nat
 
 import public Decidable.Positive
+import public Decidable.Positive.Equality
 
 %default total
 
@@ -48,46 +49,8 @@ namespace AreEqual
     urghA (Succ z) (MoreBoth w) Refl | with_pat = with_pat Refl
 
 
-  EQUAL : (x,y : Nat) -> Decidable
-  EQUAL x y
-    = D (AreEqual    x y)
-        (AreEqualNot x y)
-        prf
-
-  EQUALNOT : (x,y : Nat) -> Decidable
-  EQUALNOT x y
-    = D (AreEqualNot x y)
-        (AreEqual    x y)
-        (\x,y => prf y x)
-
-  equal : (x,y : Nat) -> Positive.Dec (EQUAL x y)
-  equal Z Z
-    = Right Zero
-  equal Z (S k)
-    = Left MoreRight
-  equal (S k) Z
-    = Left MoreLeft
-  equal (S k) (S j) with (equal k j)
-    equal (S k) (S j) | (Left x)
-      = Left (MoreBoth x)
-    equal (S k) (S j) | (Right x)
-      = Right (Succ x)
-
-  equalNot : (x,y : Nat) -> Positive.Dec (EQUALNOT x y)
-  equalNot Z Z
-    = Left Zero
-  equalNot Z (S k)
-    = Right MoreRight
-  equalNot (S k) Z
-    = Right MoreLeft
-  equalNot (S k) (S j) with (equalNot k j)
-    equalNot (S k) (S j) | (Left x)
-      = Left (Succ x)
-    equalNot (S k) (S j) | (Right x)
-      = Right (MoreBoth x)
-
   export
-  DecEqPos Nat where
+  Positive.DecEq Nat where
     DECEQpos = AreEqual
     DECEQneg = AreEqualNot
 
@@ -95,8 +58,20 @@ namespace AreEqual
 
     DECEQeq  = urgh
     DECEQeqn = urghA
-    decEqPOS = equal
-    decEqPOSNot = equalNot
+
+    decEq Z Z
+      = Right Zero
+    decEq Z (S k)
+      = Left MoreRight
+    decEq (S k) Z
+      = Left MoreLeft
+    decEq (S k) (S j) with (decEq k j)
+      decEq (S k) (S j) | (Left x)
+        = Left (MoreBoth x)
+      decEq (S k) (S j) | (Right x)
+        = Right (Succ x)
+
+    decEqN x y = mirror (decEq x y)
 
 public export
 data IsZero : Nat -> Type where
@@ -123,14 +98,12 @@ namespace IsSucc
 
   public export
   ISSUCC : Nat -> Decidable
-  ISSUCC n
-    = D (IsSucc n) (IsZero n) (negSym (Cancelled (ISZERO n)))
+  ISSUCC
+    = (Positive.Not . ISZERO)
 
   export
   isSucc : (n : Nat) -> Positive.Dec (ISSUCC n)
-  isSucc n with (IsZero.isZero n)
-    isSucc n | (Left x) = Right x
-    isSucc n | (Right x) = Left x
+  isSucc n = mirror (isZero n)
 
 export
 {x,y : Nat} -> Show (Nat.LTE x y) where
@@ -159,6 +132,35 @@ namespace GreaterThan
   isGT (S k) (S j) with (GreaterThan.isGT k j)
     isGT (S k) (S j) | (Left x) = Left (LTESucc x)
     isGT (S k) (S j) | (Right x) = Right (LTESucc x)
+
+
+namespace LessThan
+  prf : LT  x y
+     -> GTE x y
+     -> Void
+  prf (LTESucc z) (LTESucc w)
+    = prf z w
+
+  public export
+  LT : (x,y : Nat) -> Decidable
+  LT x y
+    = D (LT  x y)
+        (GTE x y)
+        prf
+
+  export
+  isLT : (x,y : Nat) -> Positive.Dec (LT x y)
+  isLT Z Z
+    = Left LTEZero
+  isLT Z (S k)
+    = Right (LTESucc LTEZero)
+  isLT (S k) Z
+    = Left LTEZero
+  isLT (S k) (S j) with (LessThan.isLT k j)
+    isLT (S k) (S j) | (Left x)
+      = Left (LTESucc x)
+    isLT (S k) (S j) | (Right x)
+      = Right (LTESucc x)
 
 
 -- [ EOF ]

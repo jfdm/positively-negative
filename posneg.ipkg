@@ -1,13 +1,19 @@
 package posneg
 
 modules = Decidable.Positive
+        , Decidable.Positive.Equality
+        , Decidable.Positive.Equality.Propositional
 
         , Decidable.Positive.So
         , Decidable.Positive.Nat
 
-        , Decidable.Positive.List.Common
-        , Decidable.Positive.List.Any
-        , Decidable.Positive.List.All
+        , Decidable.Positive.List
+        , Decidable.Positive.List.HasLength
+        , Decidable.Positive.List.Quantifier.Core
+        , Decidable.Positive.List.Quantifier.Any
+        , Decidable.Positive.List.Quantifier.Any.Wrong
+        , Decidable.Positive.List.Quantifier.All
         , Decidable.Positive.List.Elem
+        , Decidable.Positive.List.Relation.All
 
 -- [ EOF ]

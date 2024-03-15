@@ -1,4 +1,4 @@
-module Decidable.Positive.List.Common
+module Decidable.Positive.List.Quantifier.Core
 
 import public Decidable.Positive
 

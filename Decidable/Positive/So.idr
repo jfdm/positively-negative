@@ -25,8 +25,7 @@ prfOh Uh Oh impossible
 
 public export
 OH : (x : Bool) -> Decidable
-OH x
-  = D (Oh x) (So x) prfOh
+OH = (Positive.Not . SO)
 
 export
 chooseSO : (b : Bool) -> Positive.Dec (SO b)
@@ -35,7 +34,6 @@ chooseSO True = Right Oh
 
 export
 chooseOH : (b : Bool) -> Positive.Dec (OH b)
-chooseOH False = Right Uh
-chooseOH True = Left Oh
+chooseOH b = mirror (chooseSO b)
 
 -- [ EOF ]
