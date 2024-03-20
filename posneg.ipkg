@@ -7,7 +7,10 @@ modules = Decidable.Positive
         , Decidable.Positive.So
         , Decidable.Positive.Nat
 
+        , Decidable.Positive.Pair
+
         , Decidable.Positive.List
+
         , Decidable.Positive.List.HasLength
         , Decidable.Positive.List.Quantifier.Core
         , Decidable.Positive.List.Quantifier.Any
@@ -15,5 +18,5 @@ modules = Decidable.Positive
         , Decidable.Positive.List.Quantifier.All
         , Decidable.Positive.List.Elem
         , Decidable.Positive.List.Relation.All
-
+        , Decidable.Positive.List.Assoc
 -- [ EOF ]

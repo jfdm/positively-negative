@@ -28,8 +28,7 @@ namespace Quantify
         (Quantify.prf)
 
   export
-  any : {p  : type -> Decidable}
-     -> (f  : (x : type) -> Positive.Dec (p x))
+  any : (f  : (x : type) -> Positive.Dec (p x))
      -> (xs : List type)
            -> Positive.Dec (ANY p xs)
   any f []
