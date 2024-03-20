@@ -11,7 +11,7 @@ prf : {xs  : List type}
    -> Any p Positive Negative xs
    -> All p Positive Negative xs
    -> Void
-prf x y = All.prf y x
+prf x y = Quantify.prf y x
 
 export
 ANY : (p : type -> Decidable) -> (xs : List type) -> Decidable
@@ -25,7 +25,7 @@ any : {p  : type -> Decidable}
    -> (f  : (x : type) -> Positive.Dec (p x))
    -> (xs : List type)
          -> Positive.Dec (Wrong.ANY p xs)
-any f xs with (All.all f xs)
+any f xs with (Quantify.all f xs)
   any f xs | (Left x)
     = Right x
   any f xs | (Right x)

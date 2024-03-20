@@ -12,7 +12,7 @@ ELEM : Positive.DecEq type
     -> (xs : List type)
           -> Decidable
 ELEM x xs
-  = Any.ANY (DECEQ x) xs
+  = Quantify.ANY (DECEQ x) xs
 
 export
 isElem : Positive.DecEq type
@@ -20,6 +20,6 @@ isElem : Positive.DecEq type
       -> (xs : List type)
             -> Positive.Dec (ELEM x xs)
 isElem x xs
-  = Any.any (decEq x) xs
+  = Quantify.any (decEq x) xs
 
   -- [ EOF ]
