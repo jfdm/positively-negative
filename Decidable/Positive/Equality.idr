@@ -15,7 +15,7 @@ namespace Positive
     DECEQIN : (x,y : type) -> Decidable
     DECEQIN x y = D (DECEQneg x y) (DECEQpos x y) (\x,y => DECEQprf y x)
 
-    0 DECEQeq  : {x,y : type} ->  DECEQpos x y -> Equal x y
+    DECEQeq  : {x,y : type} ->  DECEQpos x y -> Equal x y
     0 DECEQeqn : {x,y : type} ->  DECEQpos x y -> DECEQneg x y -> Not (Equal x y)
 
     decEq : (x,y : type)
