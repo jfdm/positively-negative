@@ -2,6 +2,7 @@ module Decidable.Positive.List.Elem
 
 import public Decidable.Positive
 import public Decidable.Positive.Equality
+import public Decidable.Positive.List.Quantifier.Core
 import public Decidable.Positive.List.Quantifier.Any
 
 %default total
@@ -22,4 +23,4 @@ isElem : Positive.DecEq type
 isElem x xs
   = Quantify.any (decEq x) xs
 
-  -- [ EOF ]
+-- [ EOF ]

@@ -4,22 +4,23 @@ module Decidable.Positive.Equality.Propositional
 
 import public Decidable.Positive
 
+namespace Prop
+  prf : Equal x y -> Not (Equal x y) -> Void
+  prf Refl no
+    = no Refl
 
-prf : Equal x y -> Not (Equal x y) -> Void
-prf Refl no
-  = no Refl
+  public export
+  EQ : (x,y : type) -> Decidable
+  EQ x y
+    = D (Equal x y)
+        (Not (Equal x y))
+        prf
 
-public export
-EQ : (x,y : type) -> Decidable
-EQ x y
-  = D (Equal x y)
-      (Not (Equal x y))
-      prf
+  public export
+  interface DecEq type where
+    decEq : (x,y : type)
+                -> Positive.Dec (EQ x y)
 
-public export
-interface DecEq type where
-  decEq : (x,y : type)
-              -> Positive.Dec (EQ x y)
 
 
 -- [ EOF ]

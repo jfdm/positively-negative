@@ -20,7 +20,7 @@ namespace Quantify
     = Quantify.prf rest later
 
 
-  export
+  public export
   ANY : (p : type -> Decidable) -> (xs : List type) -> Decidable
   ANY p xs
     = D (Any     p Negative Positive xs)

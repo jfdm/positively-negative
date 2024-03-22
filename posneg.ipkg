@@ -6,8 +6,11 @@ modules = Decidable.Positive
 
         , Decidable.Positive.So
         , Decidable.Positive.Nat
+        , Decidable.Positive.String
 
         , Decidable.Positive.Pair
+
+        , Decidable.Positive.All.Any
 
         , Decidable.Positive.List
 

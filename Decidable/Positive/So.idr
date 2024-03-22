@@ -2,14 +2,16 @@ module Decidable.Positive.So
 
 import Decidable.Equality
 
-import Data.So
+import public Data.So
 
 import public Decidable.Positive
 
 %default total
 
+public export
 data Oh : Bool -> Type where
   Uh : Oh False
+
 
 prfSo : So x -> Oh x -> Void
 prfSo Oh Uh impossible

@@ -45,8 +45,7 @@ namespace AreEqual
   urghA Zero MoreLeft Refl impossible
   urghA Zero MoreRight Refl impossible
   urghA Zero (MoreBoth z) Refl impossible
-  urghA (Succ z) (MoreBoth w) Refl with (urghA z w)
-    urghA (Succ z) (MoreBoth w) Refl | with_pat = with_pat Refl
+  urghA (Succ z) (MoreBoth w) Refl = urghA z w Refl
 
 
   export
