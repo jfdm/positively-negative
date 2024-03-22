@@ -8,6 +8,7 @@ import Decidable.Positive.Nat
 import Decidable.Positive.Pair
 import Decidable.Positive.List.Assoc
 import Decidable.Positive.List.Elem
+import Decidable.Positive.List.ElemAt
 import Decidable.Positive.List.Quantifier.All
 import Decidable.Positive.List.Quantifier.Any
 
@@ -96,16 +97,17 @@ namespace STLC
 
     decEqN x y = mirror (decEq x y)
 
-
+  public export
   data AST = Var String
-           | Func String AST
+           | Func String Ty AST
            | App AST AST
            | Nat Nat
            | Add AST AST
 
+  public export
   data STLC : List Ty -> Ty -> Type
     where
-      V : Positive (ELEM x xs)
+      V : AtIndex s xs n
        -> STLC xs s
       F : STLC (x::xs) y
        -> STLC     xs  (FUNC x y)
@@ -117,15 +119,50 @@ namespace STLC
       N : Nat -> STLC xs NAT
       P : (x,y : STLC xs NAT) -> STLC xs NAT
 
-  data Item : Ty -> Type where
-    I : String -> Singleton ty -> Item ty
+  public export
+  data Error : Type where
+    Mismatch : (x,y : Ty) -> Error
+    FuncExpected : Ty -> Error
+    NotBound : String -> Error
 
-export
-deBruijn : Positive.DecEq type
-        => (ctxt : All Item xs)
-        -> Positive (ANY Item (HOLDS (DECEQ key) (DECEQ (the type value))) ctxt)
-        -> Elem value xs
-deBruijn (x :: xs) (Here prf) with (prf)
-  deBruijn ((I key' (Val x)) :: xs) (Here prf) | (H (Same y) prfV) = ?as_rhs_1
-deBruijn (x :: xs) (There prf tail) with (deBruijn xs tail)
-  deBruijn (x :: xs) (There prf tail) | with_pat = There with_pat
+  export
+  elab : (ctxt : Context Ty types)
+       -> (ast  : AST)
+               -> Either Error
+                         (DPair Ty (STLC types))
+  elab ctxt (Var str)
+    = case isBound str ctxt of
+        (Left x) => Left (NotBound str)
+        (Right x) =>
+          case loc x of
+            (fst ** snd) => case deBruijn snd of
+                                 ((y ** z)) => Right (_ ** V z)
+
+  elab ctxt (Func str ty y)
+    = do (tyP ** y) <- elab (I str (Val ty) :: ctxt) y
+         pure (FUNC ty tyP ** F y)
+
+  elab ctxt (App x y)
+    = do (FUNC tyx tyy ** x) <- elab ctxt x
+           | (ty ** x) => Left (FuncExpected ty)
+
+         (tyy' ** y) <- elab ctxt y
+
+
+         case decEq tyx tyy' of
+           (Left z) => Left (Mismatch tyx tyy')
+           (Right z) =>
+             case isEq z of
+               Refl => pure (tyy ** A x y)
+
+  elab ctxt (Nat k)
+    = pure (NAT ** N k)
+
+  elab ctxt (Add x y)
+    = do (NAT ** x) <- elab ctxt x
+            | (ty ** x) => Left (Mismatch NAT ty)
+
+         (NAT ** y) <- elab ctxt y
+            | (ty ** y) => Left (Mismatch NAT ty)
+
+         pure (NAT ** P x y)

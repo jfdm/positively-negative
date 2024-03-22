@@ -23,7 +23,7 @@ isVoid (Same p) (Same n)
 
 
 
-0
+
 canRefl : forall x,y
         . AreEqual Positive x y
         -> Equal x y

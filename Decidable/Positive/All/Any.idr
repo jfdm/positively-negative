@@ -61,9 +61,20 @@ ANY (item) p xs
       (All item Negative Positive p xs)
       isVoid
 
---export
---exists : (f  : (x : type) -> Positive.Dec (p x))
---      -> (xs : All item is)
---            -> Positive.Dec (EXISTS p xs)
+export
+any : {0 is : List type}
+   -> {0 p : {i : type} -> (x : item i) -> Decidable}
+   -> (f  : {0 i : type} -> (x : item i) -> Positive.Dec (p x))
+   -> (xs : All item is)
+         -> Positive.Dec (ANY item p xs)
+any f []
+  = Left Empty
+any f (x :: y) with (decideE $ f x)
+  any f (x :: y) | (Left z) with (any f y)
+    any f (x :: y) | (Left z) | (Left w)
+      = Left (Extend z w)
+    any f (x :: y) | (Left z) | (Right w)
+      = Right (There z w)
+  any f (x :: y) | (Right z) = Right (Here z)
 
 -- [ EOF ]

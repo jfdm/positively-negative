@@ -20,6 +20,43 @@ data Item : type -> Type where
 
 
 public export
+data HasKey : (p : String -> Decidable)
+           -> (t    : Decidable -> Type)
+           -> (item : Item ty)
+           -> Type
+  where
+    HK : {0 value : Singleton v}
+      -> (prfK : t (pK key))
+              -> HasKey pK t (I key value)
+
+0
+isVoidHK : HasKey p Positive i
+        -> HasKey p Negative i
+        -> Void
+isVoidHK {p = p} {i = I k v} (HK po) (HK ne) with (p k)
+  isVoidHK {p = p} {i = I k v} (HK po) (HK ne) | (D pos neg cancelled)
+    = cancelled po ne
+
+public export
+HASKEY : (p    : String -> Decidable)
+      -> (item : Item ty)
+      -> Decidable
+HASKEY p i
+  = D (HasKey p Positive i)
+      (HasKey p Negative i)
+      isVoidHK
+
+export
+hasKey : (f : (k : String) -> Positive.Dec (p k))
+      -> (item : Item ty)
+              -> Positive.Dec (HASKEY p item)
+hasKey f (I str x) with (decideE $ f str)
+  hasKey f (I str x) | (Left y)
+    = Left (HK y)
+  hasKey f (I str x) | (Right y)
+    = Right (HK y)
+
+public export
 data Holds : {ty : kind}
           -> (pK   : (type : String) -> Decidable)
           -> (pI   : (type : kind)   -> Decidable)
