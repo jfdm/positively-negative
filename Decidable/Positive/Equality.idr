@@ -5,23 +5,41 @@ import public Decidable.Positive
 namespace Positive
   public export
   interface DecEq type where
-    DECEQpos : (x,y : type) -> Type
-    DECEQneg : (x,y : type) -> Type
-    0 DECEQprf : {x,y : type} -> DECEQpos x y -> DECEQneg x y -> Void
+    POS : (x,y : type) -> Type
+    NEG : (x,y : type) -> Type
+
+    0 VOID : {0 x,y : type} -> POS x y -> NEG x y -> Void
 
     DECEQ : (x,y : type) -> Decidable
-    DECEQ x y = D (DECEQpos x y) (DECEQneg x y) DECEQprf
+    DECEQ x y
+      = D (POS x y)
+          (NEG x y)
+          VOID
 
     DECEQIN : (x,y : type) -> Decidable
-    DECEQIN x y = D (DECEQneg x y) (DECEQpos x y) (\x,y => DECEQprf y x)
+    DECEQIN x y
+      = Not (DECEQ x y)
 
-    DECEQeq  : {x,y : type} ->  DECEQpos x y -> Equal x y
-    0 DECEQeqn : {x,y : type} ->  DECEQpos x y -> DECEQneg x y -> Not (Equal x y)
+    toRefl : forall x, y . Positive (DECEQ x y) -> Equal x y
+    toVoid : forall x, y . Negative (DECEQ x y) -> Equal x y -> Void
+
+    toReflInEq : forall x, y . Negative (DECEQIN x y) -> Equal x y
+    toVoidInEq : forall x, y . Positive (DECEQIN x y) -> Equal x y -> Void
 
     decEq : (x,y : type)
                 -> Positive.Dec (DECEQ x y)
 
     decEqN : (x,y : type)
                  -> Positive.Dec (DECEQIN x y)
+
+  export
+  decEqAlt : Positive.DecEq type
+          => (x,y : type)
+                 -> Dec (Equal x y)
+  decEqAlt x y with (decideE $ Positive.decEq x y)
+    decEqAlt x y | (Left z) with (toVoid z)
+      decEqAlt x y | (Left z) | no = No no
+    decEqAlt x y | (Right z) with (Positive.toRefl z)
+      decEqAlt x x | (Right z) | Refl = Yes Refl
 
 -- [ EOF ]

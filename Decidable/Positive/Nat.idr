@@ -24,45 +24,42 @@ namespace AreEqual
                -> AreEqualNot (S x) (S y)
 
 
-  prf : AreEqual x y -> AreEqualNot x y -> Void
-  prf Zero MoreLeft impossible
-  prf Zero MoreRight impossible
-  prf Zero (MoreBoth z) impossible
-  prf (Succ Zero) (MoreBoth MoreLeft) impossible
-  prf (Succ Zero) (MoreBoth MoreRight) impossible
-  prf (Succ Zero) (MoreBoth (MoreBoth z)) impossible
-  prf (Succ (Succ Zero)) (MoreBoth (MoreBoth MoreLeft)) impossible
-  prf (Succ (Succ Zero)) (MoreBoth (MoreBoth MoreRight)) impossible
-  prf (Succ (Succ Zero)) (MoreBoth (MoreBoth (MoreBoth z))) impossible
-  prf (Succ (Succ (Succ z))) (MoreBoth (MoreBoth (MoreBoth w))) = prf z w
+  doCancel : AreEqual x y -> AreEqualNot x y -> Void
 
-  urgh : AreEqual x y -> Equal x y
-  urgh Zero = Refl
-  urgh (Succ z) with (urgh z)
-    urgh (Succ z) | Refl = Refl
+  doCancel Zero MoreLeft impossible
+  doCancel Zero MoreRight impossible
+  doCancel Zero (MoreBoth z) impossible
 
-  urghA : AreEqual x y -> AreEqualNot x y -> Not (Equal x y)
-  urghA Zero MoreLeft Refl impossible
-  urghA Zero MoreRight Refl impossible
-  urghA Zero (MoreBoth z) Refl impossible
-  urghA (Succ z) (MoreBoth w) Refl = urghA z w Refl
+  doCancel (Succ z) (MoreBoth w) = doCancel z w
 
+  toRefl : AreEqual x y -> Equal x y
+  toRefl Zero = Refl
+  toRefl (Succ z) with (toRefl z)
+    toRefl (Succ z) | Refl = Refl
+
+  toVoid : AreEqualNot x y -> Equal x y -> Void
+  toVoid (MoreBoth z) Refl with (toVoid z)
+    toVoid (MoreBoth z) Refl | no = no Refl
 
   export
   Positive.DecEq Nat where
-    DECEQpos = AreEqual
-    DECEQneg = AreEqualNot
+    POS = AreEqual
+    NEG = AreEqualNot
 
-    DECEQprf = prf
+    VOID = doCancel
 
-    DECEQeq  = urgh
-    DECEQeqn = urghA
+    toRefl = AreEqual.toRefl
+    toVoid = AreEqual.toVoid
 
-    decEq Z Z
+    toReflInEq = AreEqual.toRefl
+    toVoidInEq = AreEqual.toVoid
+
+
+    decEq 0 0
       = Right Zero
-    decEq Z (S k)
+    decEq 0 (S k)
       = Left MoreRight
-    decEq (S k) Z
+    decEq (S k) 0
       = Left MoreLeft
     decEq (S k) (S j) with (decEq k j)
       decEq (S k) (S j) | (Left x)

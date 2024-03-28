@@ -1,5 +1,6 @@
 module Examples.Elab.STLC
 
+import Data.Either
 import Data.Singleton
 
 import Decidable.Positive
@@ -20,6 +21,12 @@ namespace STLC
   public export
   data Ty = NAT | FUNC Ty Ty
 
+  export
+  Show Ty where
+    show NAT = "Nat"
+    show (FUNC a b) = "(\{show a} -> \{show b})"
+
+  public export
   data AreEqual : Ty -> Ty -> Type where
     NN : AreEqual NAT NAT
     FF : AreEqual x a -> AreEqual y b -> AreEqual (FUNC x y) (FUNC a b)
@@ -29,11 +36,30 @@ namespace STLC
   symEQ NN = NN
   symEQ (FF x y) = FF (symEQ x) (symEQ y)
 
+  public export
   data AreEqualNot : Ty -> Ty -> Type where
     NF : AreEqualNot NAT (FUNC x y)
     FN : AreEqualNot (FUNC x y) NAT
     FA : AreEqualNot x a -> AreEqualNot (FUNC x y) (FUNC a b)
     FR : AreEqualNot y b -> AreEqualNot (FUNC x y) (FUNC a b)
+
+  helper : (e,f : Ty) -> String
+  helper e f
+    = "Expected:\n\n\{show e}\n\nbut given:\n\n\{show f}"
+
+
+  show : {x,y : Ty} -> (STLC.AreEqualNot x y) -> String
+  show {x = NAT} {y = (FUNC x y)} NF
+    = helper NAT (FUNC x y)
+
+  show {x = (FUNC x y)} {y = NAT} FN
+    = helper NAT (FUNC x y)
+
+  show {x = (FUNC x y)} {y = (FUNC a b)} (FA z)
+    = "\{helper (FUNC x y) (FUNC a b)}\n\nSpecifically, the argument type differs:\n\n\{STLC.show z}"
+
+  show {x = (FUNC x y)} {y = (FUNC a b)} (FR z)
+    = "\{helper (FUNC x y) (FUNC a b)}\n\nSpecifically, the return type differs:\n\n\{STLC.show z}"
 
   symEQN : STLC.AreEqualNot a b -> STLC.AreEqualNot b a
   symEQN NF = FN
@@ -57,28 +83,27 @@ namespace STLC
     isEq (FF z w) | Refl with (isEq w)
       isEq (FF z w) | Refl | Refl = Refl
 
-  isNeg : STLC.AreEqual x y
-       -> STLC.AreEqualNot x y
+  isNeg : STLC.AreEqualNot x y
        -> Equal x y
        -> Void
-  isNeg NN NF Refl impossible
-  isNeg NN FN Refl impossible
-  isNeg NN (FA z) Refl impossible
-  isNeg NN (FR z) Refl impossible
+  isNeg (FA z) Refl with (isNeg z)
+    isNeg (FA z) Refl | boom
+      = boom Refl
+  isNeg (FR z) Refl with (isNeg z)
+    isNeg (FR z) Refl | boom
+      = boom Refl
 
-  isNeg (FF z v) (FA w) Refl = isNeg z w Refl
-  isNeg (FF z v) (FR w) Refl = isNeg v w Refl
-
-  export
+  public export
   Positive.DecEq Ty where
-    DECEQpos = AreEqual
-    DECEQneg = AreEqualNot
+    POS = AreEqual
+    NEG = AreEqualNot
 
-    DECEQprf = isVoid
+    VOID = isVoid
 
-    DECEQeq = isEq
-
-    DECEQeqn = isNeg
+    toRefl = isEq
+    toVoid = isNeg
+    toReflInEq = isEq
+    toVoidInEq = isNeg
 
     decEq NAT NAT
       = Right NN
@@ -119,18 +144,55 @@ namespace STLC
       N : Nat -> STLC xs NAT
       P : (x,y : STLC xs NAT) -> STLC xs NAT
 
+  export
+  showTM : STLC ctxt ty -> String
+  showTM _ = "urgh"
+
+  export
+  showTM' : DPair Ty (STLC ctxt) -> String
+  showTM' _ = "urgh"
+
   public export
   data Error : Type where
-    Mismatch : (x,y : Ty) -> Error
+    Mismatch : {x,y : Ty} -> Positive (DECEQIN x y) -> Error
     FuncExpected : Ty -> Error
     NotBound : String -> Error
 
   export
-  elab : (ctxt : Context Ty types)
+  Show Error where
+    show (Mismatch z)
+      = "Type Mismatch\n\n\{STLC.show z}"
+    show (FuncExpected x)
+      = "Function expected, but found:\n\n\{show x}\n"
+
+    show (NotBound str)
+      = "Not bound: \{str}"
+
+  compare : (x,y : Ty) -> Either Error
+                                 (x = y)
+  compare x y with (decEqN x y)
+    compare x y | (Left z)
+      = pure $ toRefl z
+    compare x y | (Right z)
+      = Left (Mismatch z)
+
+
+  synth :  (ctxt : Context Ty types)
+        -> (ast  : AST)
+                -> Either Error
+                          (DPair Ty (STLC types))
+
+  check : (ctxt : Context Ty types)
+       -> (ty   : Ty)
        -> (ast  : AST)
                -> Either Error
-                         (DPair Ty (STLC types))
-  elab ctxt (Var str)
+                         (STLC types ty)
+  check ctxt tyE ast
+    = do (tyF ** tm) <- synth ctxt ast
+         Refl <- compare tyE tyF
+         pure tm
+
+  synth ctxt (Var str)
     = case isBound str ctxt of
         (Left x) => Left (NotBound str)
         (Right x) =>
@@ -138,31 +200,33 @@ namespace STLC
             (fst ** snd) => case deBruijn snd of
                                  ((y ** z)) => Right (_ ** V z)
 
-  elab ctxt (Func str ty y)
-    = do (tyP ** y) <- elab (I str (Val ty) :: ctxt) y
+  synth ctxt (Func str ty y)
+    = do (tyP ** y) <- synth (I str (Val ty) :: ctxt) y
          pure (FUNC ty tyP ** F y)
 
-  elab ctxt (App x y)
-    = do (FUNC tyx tyy ** x) <- elab ctxt x
+  synth ctxt (App x y)
+    = do (FUNC tyx tyy ** x) <- synth ctxt x
            | (ty ** x) => Left (FuncExpected ty)
 
-         (tyy' ** y) <- elab ctxt y
+         y <- check ctxt tyx y
 
+         pure (tyy ** A x y)
 
-         case decEq tyx tyy' of
-           (Left z) => Left (Mismatch tyx tyy')
-           (Right z) =>
-             case isEq z of
-               Refl => pure (tyy ** A x y)
-
-  elab ctxt (Nat k)
+  synth ctxt (Nat k)
     = pure (NAT ** N k)
 
-  elab ctxt (Add x y)
-    = do (NAT ** x) <- elab ctxt x
-            | (ty ** x) => Left (Mismatch NAT ty)
-
-         (NAT ** y) <- elab ctxt y
-            | (ty ** y) => Left (Mismatch NAT ty)
-
+  synth ctxt (Add x y)
+    = do x <- check ctxt NAT x
+         y <- check ctxt NAT y
          pure (NAT ** P x y)
+
+  export
+  elab : (ast : AST) -> Either Error (DPair Ty (STLC Nil))
+  elab = synth Nil
+
+  export
+  elabShow : (ast : AST) -> String
+  elabShow ast = either show
+                        (showTM')
+                        (elab ast)
+-- [ EOF ]
