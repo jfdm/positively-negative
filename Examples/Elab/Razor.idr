@@ -36,25 +36,28 @@ data Razor : List String -> Type
     P : (x,y : Razor xs) -> Razor xs
 
 public export
-data Error : Type where
-  NotBound : String -> Error
+data Error : List String -> Type where
+   NotBound : (x : String) -> Negative (ELEM x xs) -> Error xs
+   Eek : Error (x::xs) -> Error xs
 
 export
 elab : (xs : List String)
     -> AST
-    -> Either Error
+    -> Either (Error xs)
               (Razor xs)
 elab xs (Var str)
   = decidable {d=ELEM str xs}
               (isElem str xs)
-              (const $ Left $ NotBound str)
+              (Left . NotBound str)
               (Right . V)
 
 
 elab xs (Let str v b)
   = do v <- elab xs v
-       b <- elab (str::xs) b
-       pure (L v b)
+       case elab (str::xs) b of
+         Left err => Left (Eek err)
+         Right b =>
+           pure (L v b)
 
 elab xs (Nat k)
   = Right (N k)
@@ -67,8 +70,6 @@ elab xs (Add x y)
 showIDX : Any p pos neg xs -> String
 showIDX x = Core.showAny (const "T") (const "H") x
 
---= show (Razor.showAny x)
-
 Show (Razor ctxt) where
   show (V x)
     = showIDX x
@@ -78,8 +79,12 @@ Show (Razor ctxt) where
   show (P x y)
     = "(\{show x} + \{show y})"
 
-Show Error where
-  show (NotBound s) = "Not bound: \{s}"
+show : {s,x : String} -> AreEqual Negative s x -> String
+show {x} {s} (Same prf) = "Not Equal \{x} & \{s}"
+
+Show (Error xs) where
+  show (Eek e) = show e
+  show (NotBound s prf) = "Not bound: \{s}\n\n Why:\n\n \{Core.showAll (\p => show p) prf}"
 
 export
 run : AST -> IO ()

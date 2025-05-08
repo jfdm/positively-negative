@@ -3,7 +3,8 @@ module Examples.Context
 import Data.Singleton
 
 import public Data.List.Elem
-import Data.List.Quantifiers
+
+import public Data.List.Quantifiers
 
 import public Decidable.Positive
 import public Decidable.Positive.Equality

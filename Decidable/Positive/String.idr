@@ -8,7 +8,7 @@ import public Decidable.Positive.Equality
 
 public export
 data AreEqual : (Decidable -> Type) -> (x,y : String) -> Type where
-  Same : (prf : t (SO (x == y))) -> AreEqual t x y
+  Same : {x,y : String} -> (prf : t (SO (x == y))) -> AreEqual t x y
 
 void : So x -> Oh x -> Void
 void Oh Uh impossible

@@ -35,6 +35,7 @@ namespace List
       T : HoldsAtNot t p     xs    n
        -> HoldsAtNot t p (x::xs) (S n)
 
+  public export
   0
   isVoid : HoldsAt    Positive p xs n
         -> HoldsAtNot Negative p xs n
