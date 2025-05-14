@@ -1,45 +1,61 @@
 module Decidable.Positive.Equality
 
-import public Decidable.Positive
+import Decidable.Positive
 
 namespace Positive
   public export
+  record DecEqDesc type where
+    constructor MkDecEq
+    Positive : (x,y : type) -> Type
+    Negative : (x,y : type) -> Type
+    0 Cancelled : {0 x,y : type}
+                        -> Positive x y
+                        -> Negative x y
+                        -> Void
+
+    toRefl : {0 x,y : type}
+                   -> Positive x y
+                   -> Equal x y
+    toVoid : {0 x,y : type}
+                   -> Negative x y
+                   -> Equal x y
+                   -> Void
+
+  namespace Def
+    public export
+    DECEQ : (raw : Positive.DecEqDesc type) ->  (x,y : type) -> Decidable
+    DECEQ raw x y
+      = D (raw.Positive x y)
+          (raw.Negative x y)
+          (raw.Cancelled)
+
+    public export
+    DECEQIN : (raw : Positive.DecEqDesc type) ->  (x,y : type) -> Decidable
+    DECEQIN raw x y
+      = Swap (DECEQ raw x y)
+
+  public export
   interface DecEq type where
-    POS : (x,y : type) -> Type
-    NEG : (x,y : type) -> Type
+    INST : Positive.DecEqDesc type
 
-    0 VOID : {0 x,y : type} -> POS x y -> NEG x y -> Void
+    decEq : (x,y : type) -> Positive.Dec (DECEQ INST x y)
 
-    DECEQ : (x,y : type) -> Decidable
-    DECEQ x y
-      = D (POS x y)
-          (NEG x y)
-          VOID
+    toRefl : forall x, y . (Positive INST) x y -> Equal x y
+    toRefl = (toRefl INST)
 
-    DECEQIN : (x,y : type) -> Decidable
-    DECEQIN x y
-      = Not (DECEQ x y)
+    toVoid : forall x, y . (Negative INST) x y -> Equal x y -> Void
+    toVoid = (toVoid INST)
 
-    toRefl : forall x, y . Positive (DECEQ x y) -> Equal x y
-    toVoid : forall x, y . Negative (DECEQ x y) -> Equal x y -> Void
+    decEqN : (x,y : type) -> Positive.Dec (DECEQIN INST x y)
+    decEqN x y = mirror (Positive.decEq x y)
 
-    toReflInEq : forall x, y . Negative (DECEQIN x y) -> Equal x y
-    toVoidInEq : forall x, y . Positive (DECEQIN x y) -> Equal x y -> Void
 
-    decEq : (x,y : type)
-                -> Positive.Dec (DECEQ x y)
+  public export
+  DECEQ : Positive.DecEq type => (x,y : type) -> Decidable
+  DECEQ = DECEQ INST
 
-    decEqN : (x,y : type)
-                 -> Positive.Dec (DECEQIN x y)
-
-  export
-  decEqAlt : Positive.DecEq type
-          => (x,y : type)
-                 -> Dec (Equal x y)
-  decEqAlt x y with (decideE $ Positive.decEq x y)
-    decEqAlt x y | (Left z) with (toVoid z)
-      decEqAlt x y | (Left z) | no = No no
-    decEqAlt x y | (Right z) with (Positive.toRefl z)
-      decEqAlt x x | (Right z) | Refl = Yes Refl
+  public export
+  DECEQIN : Positive.DecEq type => (x,y : type) -> Decidable
+  DECEQIN = DECEQIN INST
 
 -- [ EOF ]

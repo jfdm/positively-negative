@@ -27,7 +27,6 @@ symEQ (FF x y) = FF (symEQ x) (symEQ y)
 public export
 data AreEqualNot : Ty -> Ty -> Type where
   NF : AreEqualNot NAT (FUNC x y)
-  FN : AreEqualNot (FUNC x y) NAT
   FA : AreEqualNot x a -> AreEqualNot (FUNC x y) (FUNC a b)
   FR : AreEqualNot y b -> AreEqualNot (FUNC x y) (FUNC a b)
 
@@ -40,9 +39,6 @@ show : {x,y : Ty} -> (Types.AreEqualNot x y) -> String
 show {x = NAT} {y = (FUNC x y)} NF
   = helper NAT (FUNC x y)
 
-show {x = (FUNC x y)} {y = NAT} FN
-  = helper NAT (FUNC x y)
-
 show {x = (FUNC x y)} {y = (FUNC a b)} (FA z)
   = "\{helper (FUNC x y) (FUNC a b)}\n\nSpecifically, the argument type differs:\n\n\{Types.show z}"
 
@@ -50,14 +46,12 @@ show {x = (FUNC x y)} {y = (FUNC a b)} (FR z)
   = "\{helper (FUNC x y) (FUNC a b)}\n\nSpecifically, the return type differs:\n\n\{Types.show z}"
 
 symEQN : Types.AreEqualNot a b -> Types.AreEqualNot b a
-symEQN NF = FN
-symEQN FN = NF
+symEQN NF = symEQN NF
 symEQN (FA x) = FA (symEQN x)
 symEQN (FR x) = FR (symEQN x)
 
 isVoid : AreEqual x y -> Types.AreEqualNot x y -> Void
 isVoid NN NF impossible
-isVoid NN FN impossible
 isVoid NN (FA z) impossible
 isVoid NN (FR z) impossible
 
@@ -82,34 +76,33 @@ isNeg (FR z) Refl with (isNeg z)
   isNeg (FR z) Refl | boom
     = boom Refl
 
-export
-Positive.DecEq Ty where
-  POS = AreEqual
-  NEG = AreEqualNot
 
-  VOID = isVoid
+tyDecEq : DecEqDesc Ty
+tyDecEq = MkDecEq AreEqual AreEqualNot isVoid isEq isNeg
 
-  toRefl = isEq
-  toVoid = isNeg
-  toReflInEq = isEq
-  toVoidInEq = isNeg
+DecEq Ty where
+  INST = tyDecEq
 
   decEq NAT NAT
     = Right NN
+
   decEq NAT (FUNC x y)
     = Left NF
-  decEq (FUNC x z) NAT
-    = Left FN
-  decEq (FUNC x z) (FUNC y w) with (decEq x y)
-    decEq (FUNC x z) (FUNC y w) | (Left v)
-      = Left (FA v)
-    decEq (FUNC x z) (FUNC y w) | (Right v) with (decEq z w)
-      decEq (FUNC x z) (FUNC y w) | (Right v) | (Left s)
-        = Left (FR s)
-      decEq (FUNC x z) (FUNC y w) | (Right v) | (Right s)
-        = Right (FF v s)
 
-  decEqN x y = mirror (decEq x y)
+  decEq (FUNC x z) NAT
+    = Left (symEQN NF)
+
+  decEq (FUNC x z) (FUNC a b) with (decEq x a)
+    decEq (FUNC x z) (FUNC a b) | (Left err)
+      = Left (FA err)
+
+    decEq (FUNC x z) (FUNC a b) | (Right vdom) with (decEq z b)
+      decEq (FUNC x z) (FUNC a b) | (Right vdom) | (Left err)
+        = Left (FR err)
+
+      decEq (FUNC x z) (FUNC a b) | (Right vdom) | (Right vdomco)
+        = Right (FF vdom vdomco)
+
 
 public export
 data IsFunc : Ty -> Type where

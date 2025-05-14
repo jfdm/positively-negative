@@ -1,6 +1,6 @@
 module Decidable.Positive.List.HasLength
 
-import public Decidable.Positive
+import        Decidable.Positive
 import public Data.List.HasLength
 
 %default total

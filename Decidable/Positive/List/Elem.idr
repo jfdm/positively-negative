@@ -1,6 +1,6 @@
 module Decidable.Positive.List.Elem
 
-import public Decidable.Positive
+import        Decidable.Positive
 import public Decidable.Positive.Equality
 import public Decidable.Positive.List.Quantifier.Core
 import public Decidable.Positive.List.Quantifier.Any

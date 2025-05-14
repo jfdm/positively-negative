@@ -1,7 +1,7 @@
 module Decidable.Positive.All.Any
 
 import public Data.List.Quantifiers
-import public Decidable.Positive
+import        Decidable.Positive
 
 public export
 data Any : (item  : type -> Type)

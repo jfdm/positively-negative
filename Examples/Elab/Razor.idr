@@ -3,6 +3,8 @@ module Examples.Elab.Razor
 import Data.Singleton
 
 import Decidable.Positive
+import Decidable.Positive.So
+import Decidable.Positive.Equality
 import Decidable.Positive.String
 import Decidable.Positive.Nat
 import Decidable.Positive.Pair
@@ -25,7 +27,7 @@ data AST = Var String
 public export
 data Razor : List String -> Type
   where
-    V : {x,xs : _} -> Positive (ELEM x xs)
+    V : forall x, xs . Positive (ELEM x xs)
      -> Razor xs
 
     L : Razor xs
@@ -45,11 +47,9 @@ elab : (xs : List String)
     -> AST
     -> Either (Error xs)
               (Razor xs)
-elab xs (Var str)
-  = decidable {d=ELEM str xs}
-              (isElem str xs)
-              (Left . NotBound str)
-              (Right . V)
+elab xs (Var str) with (isElem str xs)
+  elab xs (Var str) | (Left err) = Left (NotBound str err)
+  elab xs (Var str) | (Right x) = Right (V x)
 
 
 elab xs (Let str v b)

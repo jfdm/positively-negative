@@ -73,18 +73,21 @@ namespace STLC
                         -> Type
         where
           SynthError : Synth.Error ctxt -> Error ctxt typeE
-          Mismatch : (tyG : Ty)
+          Mismatch : Positive.DecEq Ty
+                  => (tyG : Ty)
                   -> (prf : Positive $ DECEQIN tyG ty)
                          -> Error ctxt ty
 
   export
-  synth :  (ctxt : Context Ty types)
+  synth : Positive.DecEq Ty
+        => (ctxt : Context Ty types)
         -> (ast  : AST)
                 -> Either (Synth.Error ctxt)
                           (DPair Ty (STLC  types))
 
   export
-  check : (ctxt : Context Ty types)
+  check : Positive.DecEq Ty
+       => (ctxt : Context Ty types)
        -> (ty   : Ty)
        -> (ast  : AST)
                -> Either (Check.Error ctxt  ty)
@@ -95,7 +98,7 @@ namespace STLC
     check ctxt ty ast | (Right (syn ** tm)) with (decEq syn ty)
       check ctxt ty ast | (Right (syn ** tm)) | (Left err)
         = Left (Mismatch syn err)
-      check ctxt ty ast | (Right (syn ** tm)) | (Right prf) with (isEq prf)
+      check ctxt ty ast | (Right (syn ** tm)) | (Right prf) with (Positive.toRefl prf)
         check ctxt ty ast | (Right (ty ** tm)) | (Right prf) | Refl
           = Right tm
 
@@ -161,11 +164,12 @@ namespace STLC
         = "Given:\n\t\{show tyG}\n Expected\n\t\{show ty}"
 
   export
-  elab : (ast : AST) -> Either (Error Nil) (DPair Ty (STLC Nil))
+  elab : Positive.DecEq Ty
+      => (ast : AST) -> Either (Error Nil) (DPair Ty (STLC Nil))
   elab = synth Nil
 
   export
-  elabShow : (ast : AST) -> String
+  elabShow : Positive.DecEq Ty => (ast : AST) -> String
   elabShow ast = either show
                         (const $ "yes")
                         (elab ast)

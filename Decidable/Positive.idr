@@ -16,7 +16,12 @@ Show : Decidable -> Type
 Show (D p n _)
   = (Show p, Show n)
 
-export
+public export
+swap : (no  : p -> n -> Void)
+          -> (n -> p -> Void)
+swap no x y = no y x
+
+public export
 negSym : (no  : p -> n -> Void)
             -> (n -> p -> Void)
 negSym no x y = no y x
@@ -26,12 +31,18 @@ Not : Decidable -> Decidable
 Not (D p q no)
   = D q p (negSym no)
 
+public export
+Swap : Decidable -> Decidable
+Swap (D p q no)
+  = D q p (negSym no)
+
 ||| This function is entirely Bob's idea.
 public export
 0
 Dec : Decidable -> Type
 Dec (D p q no)
   = Either q p
+
 
 public export
 data Decide : (d : Decidable) -> Positive.Dec d -> Type where

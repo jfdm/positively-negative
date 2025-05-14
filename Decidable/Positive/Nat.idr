@@ -2,8 +2,8 @@ module Decidable.Positive.Nat
 
 import public Data.Nat
 
-import public Decidable.Positive
-import public Decidable.Positive.Equality
+import Decidable.Positive
+import Decidable.Positive.Equality
 
 %default total
 
@@ -25,7 +25,6 @@ namespace AreEqual
 
 
   doCancel : AreEqual x y -> AreEqualNot x y -> Void
-
   doCancel Zero MoreLeft impossible
   doCancel Zero MoreRight impossible
   doCancel Zero (MoreBoth z) impossible
@@ -43,17 +42,7 @@ namespace AreEqual
 
   export
   Positive.DecEq Nat where
-    POS = AreEqual
-    NEG = AreEqualNot
-
-    VOID = doCancel
-
-    toRefl = AreEqual.toRefl
-    toVoid = AreEqual.toVoid
-
-    toReflInEq = AreEqual.toRefl
-    toVoidInEq = AreEqual.toVoid
-
+    INST = MkDecEq AreEqual AreEqualNot doCancel toRefl toVoid
 
     decEq 0 0
       = Right Zero
@@ -67,7 +56,6 @@ namespace AreEqual
       decEq (S k) (S j) | (Right x)
         = Right (Succ x)
 
-    decEqN x y = mirror (decEq x y)
 
 public export
 data IsZero : Nat -> Type where
@@ -129,6 +117,14 @@ namespace GreaterThan
     isGT (S k) (S j) | (Left x) = Left (LTESucc x)
     isGT (S k) (S j) | (Right x) = Right (LTESucc x)
 
+  public export
+  LTE : (x,y : Nat) -> Decidable
+  LTE x y
+    = Swap (GT x y)
+
+  export
+  isLTE : (x,y : Nat) -> Positive.Dec (LTE x y)
+  isLTE x y = mirror (isGT x y)
 
 namespace LessThan
   prf : LT  x y
@@ -158,5 +154,13 @@ namespace LessThan
     isLT (S k) (S j) | (Right x)
       = Right (LTESucc x)
 
+  public export
+  GTE : (x,y : Nat) -> Decidable
+  GTE x y
+    = Swap (LT x y)
+
+  export
+  isGTE : (x,y : Nat) -> Positive.Dec (GTE x y)
+  isGTE x y = mirror (isLT x y)
 
 -- [ EOF ]

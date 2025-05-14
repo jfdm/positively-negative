@@ -1,7 +1,6 @@
 module Decidable.Positive.List.ElemAt
 
-import public Decidable.Positive
-import public Decidable.Positive.Equality
+import Decidable.Positive
 
 %default total
 

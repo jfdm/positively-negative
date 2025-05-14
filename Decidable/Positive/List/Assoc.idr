@@ -1,7 +1,8 @@
 module Decidable.Positive.List.Assoc
 
-import public Decidable.Positive
-import public Decidable.Positive.Equality
+import        Decidable.Positive
+import        Decidable.Positive.Equality
+
 import public Decidable.Positive.Pair
 import public Decidable.Positive.List.Quantifier.Any
 

@@ -1,9 +1,9 @@
 module Decidable.Positive.List.Relation.All
 
-import public Decidable.Positive
+import        Decidable.Positive
 import public Decidable.Positive.Equality
-import public Decidable.Positive.List.All
-import public Decidable.Positive.List.Any
+import public Decidable.Positive.List.Quantifier.All
+import public Decidable.Positive.List.Quantifier.Any
 
 %default total
 
@@ -46,10 +46,11 @@ namespace Relation
   prf Empty (Here x) impossible
   prf Empty (There head tail) impossible
 
-  prf (Cons hF tF) (Here x)
-    = All.prf hF x
+  prf {p} {xs=s::xs} (Cons hF tF) (Here x)
+    = All.Quantify.prf hF x
   prf (Cons _ tF) (There _ tFN)
     = prf tF tFN
+
 
   public export
   ALL : (p  : (x,y : type) -> Decidable)
@@ -66,7 +67,7 @@ namespace Relation
                 -> Positive.Dec (Relation.ALL p xs)
   all f []
     = Right Empty
-  all f (x :: xs) with (All.all (f x) xs)
+  all f (x :: xs) with (Quantify.all (f x) xs)
     all f (x :: xs) | (Left y)
       = Left (Here y)
     all f (x :: xs) | (Right y) with (Relation.all f xs)

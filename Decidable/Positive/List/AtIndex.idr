@@ -1,9 +1,6 @@
 module Decidable.Positive.List.AtIndex
 
-import public Decidable.Positive
-import public Decidable.Positive.Equality
-
-
+import Decidable.Positive
 
 public export
 data AtIndex : (x   :      type)
@@ -14,3 +11,6 @@ data AtIndex : (x   :      type)
     Here : AtIndex x (x::xs) Z
     There : (later : AtIndex x     rest     idx)
                   -> AtIndex x (y::rest) (S idx)
+
+
+-- [ E0F ]
