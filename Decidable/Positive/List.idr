@@ -41,12 +41,14 @@ isCons xs = mirror (isEmpty xs)
 
 namespace Equality
 
+  public export
   data AreEqual : (p : a -> a -> Decidable) -> List a -> List a -> Type where
     Here : AreEqual p Nil Nil
     There : {0 p : a -> a -> Decidable} -> (p x y).Positive
          -> AreEqual p xs ys
          -> AreEqual p (x::xs) (y::ys)
 
+  public export
   data AreEqualNot : (p : a -> a -> Decidable) -> List a -> List a -> Type where
     LeftHeavy  : AreEqualNot p (x::xs) Nil
     RightHeavy : AreEqualNot p Nil     (y::ys)
