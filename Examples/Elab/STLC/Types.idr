@@ -19,7 +19,6 @@ data AreEqual : Ty -> Ty -> Type where
   NN : AreEqual NAT NAT
   FF : AreEqual x a -> AreEqual y b -> AreEqual (FUNC x y) (FUNC a b)
 
-export
 symEQ : Types.AreEqual a b -> Types.AreEqual b a
 symEQ NN = NN
 symEQ (FF x y) = FF (symEQ x) (symEQ y)
@@ -27,6 +26,7 @@ symEQ (FF x y) = FF (symEQ x) (symEQ y)
 public export
 data AreEqualNot : Ty -> Ty -> Type where
   NF : AreEqualNot NAT (FUNC x y)
+  FN : AreEqualNot (FUNC x y) NAT
   FA : AreEqualNot x a -> AreEqualNot (FUNC x y) (FUNC a b)
   FR : AreEqualNot y b -> AreEqualNot (FUNC x y) (FUNC a b)
 
@@ -39,6 +39,9 @@ show : {x,y : Ty} -> (Types.AreEqualNot x y) -> String
 show {x = NAT} {y = (FUNC x y)} NF
   = helper NAT (FUNC x y)
 
+show {y = NAT} {x = (FUNC x y)} FN
+  = helper (FUNC x y) NAT
+
 show {x = (FUNC x y)} {y = (FUNC a b)} (FA z)
   = "\{helper (FUNC x y) (FUNC a b)}\n\nSpecifically, the argument type differs:\n\n\{Types.show z}"
 
@@ -46,7 +49,8 @@ show {x = (FUNC x y)} {y = (FUNC a b)} (FR z)
   = "\{helper (FUNC x y) (FUNC a b)}\n\nSpecifically, the return type differs:\n\n\{Types.show z}"
 
 symEQN : Types.AreEqualNot a b -> Types.AreEqualNot b a
-symEQN NF = symEQN NF
+symEQN NF = FN
+symEQN FN = NF
 symEQN (FA x) = FA (symEQN x)
 symEQN (FR x) = FR (symEQN x)
 
@@ -58,7 +62,7 @@ isVoid NN (FR z) impossible
 isVoid (FF z v) (FA w) = isVoid z w
 isVoid (FF z v) (FR w) = isVoid v w
 
-export
+public export
 isEq : Types.AreEqual x y -> Equal x y
 isEq NN
   = Refl
@@ -76,12 +80,23 @@ isNeg (FR z) Refl with (isNeg z)
   isNeg (FR z) Refl | boom
     = boom Refl
 
+--public export
+--HAS_EQUALITY Ty where
+--  Positive = AreEqual
+--  Negative = AreEqualNot
+--  Cancelled = isVoid
+--  toRefl = isEq
+--  toVoid = isNeg
 
-tyDecEq : DecEqDesc Ty
-tyDecEq = MkDecEq AreEqual AreEqualNot isVoid isEq isNeg
 
-DecEq Ty where
-  INST = tyDecEq
+export
+DecEQ Ty where
+
+  EQUAL x y = D (AreEqual x y) (AreEqualNot x y) isVoid
+
+  toRefl = isEq
+
+  toVoid = isNeg
 
   decEq NAT NAT
     = Right NN

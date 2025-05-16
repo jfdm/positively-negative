@@ -73,21 +73,18 @@ namespace STLC
                         -> Type
         where
           SynthError : Synth.Error ctxt -> Error ctxt typeE
-          Mismatch : Positive.DecEq Ty
-                  => (tyG : Ty)
-                  -> (prf : Positive $ DECEQIN tyG ty)
+          Mismatch : (tyG : Ty)
+                  -> (prf : Negative $ EQUAL tyG ty)
                          -> Error ctxt ty
 
   export
-  synth : Positive.DecEq Ty
-        => (ctxt : Context Ty types)
-        -> (ast  : AST)
+  synth : (ctxt : Context Ty types)
+       -> (ast  : AST)
                 -> Either (Synth.Error ctxt)
                           (DPair Ty (STLC  types))
 
   export
-  check : Positive.DecEq Ty
-       => (ctxt : Context Ty types)
+  check : (ctxt : Context Ty types)
        -> (ty   : Ty)
        -> (ast  : AST)
                -> Either (Check.Error ctxt  ty)
@@ -95,12 +92,10 @@ namespace STLC
   check ctxt ty ast with (synth ctxt ast)
     check ctxt ty ast | (Left err)
       = Left (SynthError err)
-    check ctxt ty ast | (Right (syn ** tm)) with (decEq syn ty)
+    check ctxt ty ast | (Right (syn ** tm)) with (decEq' syn ty)
       check ctxt ty ast | (Right (syn ** tm)) | (Left err)
         = Left (Mismatch syn err)
-      check ctxt ty ast | (Right (syn ** tm)) | (Right prf) with (Positive.toRefl prf)
-        check ctxt ty ast | (Right (ty ** tm)) | (Right prf) | Refl
-          = Right tm
+      check ctxt ty ast | (Right (ty ** tm)) | (Right Refl) = Right tm
 
   synth ctxt (Var str)
     = case isBound str ctxt of
@@ -164,12 +159,11 @@ namespace STLC
         = "Given:\n\t\{show tyG}\n Expected\n\t\{show ty}"
 
   export
-  elab : Positive.DecEq Ty
-      => (ast : AST) -> Either (Error Nil) (DPair Ty (STLC Nil))
+  elab : (ast : AST) -> Either (Error Nil) (DPair Ty (STLC Nil))
   elab = synth Nil
 
   export
-  elabShow : Positive.DecEq Ty => (ast : AST) -> String
+  elabShow : (ast : AST) -> String
   elabShow ast = either show
                         (const $ "yes")
                         (elab ast)

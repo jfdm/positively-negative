@@ -36,11 +36,11 @@ data Any : (pred : (value : type) -> Decidable)
                 -> Type
   where
     Here : {x   : type}
-        -> (prf : neg (p x))
+        -> (prf : pos (p x))
                -> Any p pos neg (x::xs)
 
     There : {x : type}
-         -> (prf : pos (p x))
+         -> (prf : neg (p x))
          -> (rest : Any p pos neg     xs)
                  -> Any p pos neg (x::xs)
 
@@ -50,9 +50,9 @@ showAny : (f : {x : _} -> pos (p x) -> String)
        -> Any p pos neg xs
        -> String
 showAny f g (Here prf)
-  = g prf
+  = f prf
 showAny f g (There prf rest)
-  = "(\{f prf} :: \{showAny f g rest})"
+  = "(\{g prf} :: \{showAny f g rest})"
 
 
 -- [ EOF ]

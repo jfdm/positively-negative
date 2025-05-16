@@ -10,7 +10,7 @@ namespace Quantify
   0
   prf : {xs  : List type}
      -> All p Positive Negative xs
-     -> Any p Positive Negative xs
+     -> Any p Negative Positive xs
      -> Void
   prf Empty (Here x) impossible
   prf Empty (There x rest) impossible
@@ -27,7 +27,7 @@ namespace Quantify
   ALL : (p : type -> Decidable) -> (xs : List type) -> Decidable
   ALL p xs
     = D (All     p Positive Negative xs)
-        (Any     p Positive Negative xs)
+        (Any     p Negative Positive xs)
         (Quantify.prf)
 
   export
@@ -50,7 +50,7 @@ namespace Quantify
          -> Positive.Dec (ALL p xs)
          -> String
   showALL f g (Left x)
-    = "(No (Any) \{showAny f g x})"
+    = "(No (Any) \{showAny g f x})"
   showALL f g (Right x)
     = "(Yes (All) \{showAll f x})"
 

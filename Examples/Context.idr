@@ -34,7 +34,7 @@ ISBOUND : (str : String)
        -> (ctxt : Context kind xs)
        -> Decidable
 ISBOUND str ctxt
-  = ANY Item (HASKEY (DECEQ str)) ctxt
+  = ANY Item (HASKEY (EQUAL str)) ctxt
 
 export
 isBound : (str : String)
@@ -44,8 +44,8 @@ isBound str ctxt
   = any (hasKey (decEq str)) ctxt
 
 export
-loc :                  Positive (ANY     Item (HASKEY (DECEQ str)) ctxt)
-   -> DPair Nat (\n => Positive (HOLDSAT      (HASKEY (DECEQ str)) ctxt  n))
+loc :                  Positive (ANY     Item (HASKEY (EQUAL str)) ctxt)
+   -> DPair Nat (\n => Positive (HOLDSAT      (HASKEY (EQUAL str)) ctxt  n))
 loc (Here prf) = (0 ** Here prf)
 loc (There prf tail) with (loc tail)
   loc (There prf tail) | ((fst ** snd)) = (S fst ** There snd)
@@ -61,9 +61,8 @@ data AtIndex : (x   :      type)
                   -> AtIndex x (y::rest) (S idx)
 
 export
-deBruijn : Positive.DecEq kind
-        => {ctxt : All Item xs}
-        -> Positive (HOLDSAT (HASKEY (DECEQ key)) ctxt n)
+deBruijn : {ctxt : All Item xs}
+        -> Positive (HOLDSAT (HASKEY (EQUAL key)) ctxt n)
         -> DPair kind (\t => AtIndex t xs n)
 deBruijn (Here {x=I k (Val v)} (HK prfK))
   = (v ** Here)

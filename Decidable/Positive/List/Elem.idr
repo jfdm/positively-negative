@@ -8,15 +8,15 @@ import public Decidable.Positive.List.Quantifier.Any
 %default total
 
 public export
-ELEM : Positive.DecEq type
+ELEM : DecEQ type
     => (x  : type)
     -> (xs : List type)
           -> Decidable
 ELEM x xs
-  = Quantify.ANY (DECEQ x) xs
+  = Quantify.ANY (EQUAL x) xs
 
 export
-isElem : Positive.DecEq type
+isElem : DecEQ type
       => (x  : type)
       -> (xs : List type)
             -> Positive.Dec (ELEM x xs)

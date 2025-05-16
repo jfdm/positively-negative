@@ -42,16 +42,16 @@ holdBoth f g
   = Quantify.any (both f g)
 
 public export
-HOLDAT : Positive.DecEq key
+HOLDAT : DecEQ key
       => (k   : key)
       -> (s   : value -> Decidable)
       -> (kvs : List (key,value))
              -> Decidable
 HOLDAT k
-  = HOLDBOTH (DECEQ k)
+  = HOLDBOTH (EQUAL k)
 
 export
-holdAt : Positive.DecEq key
+holdAt : DecEQ key
       => (f   : (v : value) -> Positive.Dec (p v))
       -> (k   : key)
       -> (kvs : List (key,value))
@@ -61,18 +61,18 @@ holdAt f k
 
 
 public export
-EXISTS : Positive.DecEq key
-      => Positive.DecEq value
+EXISTS : DecEQ key
+      => DecEQ value
       => (k   : key)
       -> (s   : value)
       -> (kvs : List (key,value))
              -> Decidable
 EXISTS k s
-  = HOLDBOTH (DECEQ k) (DECEQ s)
+  = HOLDBOTH (EQUAL k) (EQUAL s)
 
 export
-exists : Positive.DecEq key
-      => Positive.DecEq value
+exists : DecEQ key
+      => DecEQ value
       => (k   : key)
       -> (v   : value)
       -> (kvs : List (key,value))

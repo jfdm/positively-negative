@@ -36,9 +36,21 @@ canVoid : forall x,y
 canVoid (Same z) Refl
   = believe_me {b = Void} ()
 
+--public export
+--HAS_EQUALITY String where
+--  Positive = (AreEqual Positive)
+--  Negative = (AreEqual Negative)
+--  Cancelled = isVoid
+--  toRefl = canRefl
+--  toVoid = canVoid
+
 public export
-Positive.DecEq String where
-  INST = MkDecEq (AreEqual Positive) (AreEqual Negative) isVoid canRefl canVoid
+DecEQ String where
+  EQUAL x y = D (AreEqual Positive x y)
+                    (AreEqual Negative x y)
+                    isVoid
+  toRefl = canRefl
+  toVoid = canVoid
 
   decEq x y with (chooseSO (x == y))
     decEq x y | (Left z)

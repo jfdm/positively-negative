@@ -1,13 +1,16 @@
 module Examples
 
 import Decidable.Positive
+import Decidable.Positive.Equality
 import Decidable.Positive.Nat
+import Decidable.Positive.List
 import Decidable.Positive.List.Elem
 import Decidable.Positive.List.Quantifier.All
 import Decidable.Positive.List.Quantifier.Any
 import Decidable.Positive.List.Quantifier.Any.Wrong
 
 %default total
+
 
 namespace Main
 

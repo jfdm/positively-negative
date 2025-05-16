@@ -40,9 +40,20 @@ namespace AreEqual
   toVoid (MoreBoth z) Refl with (toVoid z)
     toVoid (MoreBoth z) Refl | no = no Refl
 
-  export
-  Positive.DecEq Nat where
-    INST = MkDecEq AreEqual AreEqualNot doCancel toRefl toVoid
+--  public export
+--  HAS_EQUALITY Nat where
+--    Positive = AreEqual
+--    Negative = AreEqualNot
+--    Cancelled = doCancel
+--    toRefl = AreEqual.toRefl
+--    toVoid = AreEqual.toVoid
+
+  public export
+  DecEQ Nat where
+    EQUAL x y = D (AreEqual x y) (AreEqualNot x y) doCancel
+
+    toRefl = AreEqual.toRefl
+    toVoid = AreEqual.toVoid
 
     decEq 0 0
       = Right Zero
