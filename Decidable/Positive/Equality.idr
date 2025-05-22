@@ -22,8 +22,9 @@ namespace Positive
 namespace Practical
   export
   decEq' : DecEQ type => (x,y : type) -> Either ((EQUAL x y).Negative) (x = y)
-  decEq' x y with (decideE $ Positive.decEq x y)
+  decEq' x y with (Positive.decEq x y)
     decEq' x y | (Left z) = Left z
     decEq' x y | (Right z) = Right $ toRefl z
+
 
 -- [ EOF ]

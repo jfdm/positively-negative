@@ -40,14 +40,6 @@ namespace AreEqual
   toVoid (MoreBoth z) Refl with (toVoid z)
     toVoid (MoreBoth z) Refl | no = no Refl
 
---  public export
---  HAS_EQUALITY Nat where
---    Positive = AreEqual
---    Negative = AreEqualNot
---    Cancelled = doCancel
---    toRefl = AreEqual.toRefl
---    toVoid = AreEqual.toVoid
-
   public export
   DecEQ Nat where
     EQUAL x y = D (AreEqual x y) (AreEqualNot x y) doCancel
@@ -124,9 +116,10 @@ namespace GreaterThan
   isGT 0 0 = Left LTEZero
   isGT 0 (S k) = Left LTEZero
   isGT (S k) 0 = Right (LTESucc LTEZero)
-  isGT (S k) (S j) with (GreaterThan.isGT k j)
-    isGT (S k) (S j) | (Left x) = Left (LTESucc x)
-    isGT (S k) (S j) | (Right x) = Right (LTESucc x)
+  isGT (S k) (S j)
+    = either (Left  . LTESucc)
+             (Right . LTESucc)
+             (GreaterThan.isGT k j)
 
   public export
   LTE : (x,y : Nat) -> Decidable
@@ -159,11 +152,10 @@ namespace LessThan
     = Right (LTESucc LTEZero)
   isLT (S k) Z
     = Left LTEZero
-  isLT (S k) (S j) with (LessThan.isLT k j)
-    isLT (S k) (S j) | (Left x)
-      = Left (LTESucc x)
-    isLT (S k) (S j) | (Right x)
-      = Right (LTESucc x)
+  isLT (S k) (S j)
+    = either (Left  . LTESucc)
+             (Right . LTESucc)
+             (LessThan.isLT k j)
 
   public export
   GTE : (x,y : Nat) -> Decidable

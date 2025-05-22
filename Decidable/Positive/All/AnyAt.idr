@@ -27,7 +27,10 @@ data HoldsAtNot : (item  : type -> Type)
         -> (n : Nat)
                  -> Type
   where
-    Empty : {0 p   : {i : type} -> (x : item i) -> Decidable} -> HoldsAtNot item pos p Nil n
+    Empty : {0 p : {i : type}
+         -> (  x : item i) -> Decidable}
+                -> HoldsAtNot item pos p Nil n
+
     H : {0 p   : {i : type} -> (x : item i) -> Decidable}
           -> (  prf : pos (p x))
           -> HoldsAtNot item pos p (x::xs) Z
@@ -41,10 +44,10 @@ isVoid : {p   : {i : type} -> (x : item i) -> Decidable}
       -> HoldsAt    item Positive p xs n
       -> HoldsAtNot item Negative p xs n
       -> Void
-isVoid {p = p} {xs = (x :: xs)} {n = 0} (Here prf) (H y) with (p x)
-  isVoid {p = p} {xs = (x :: xs)} {n = 0} (Here prf) (H y) | (D positive negative cancelled)
-    = cancelled prf y
-isVoid {p = p} {xs = (x :: xs)} {n = (S n)} (There tail) (T y) = isVoid tail y
+isVoid {p = p} {xs = (x :: xs)} {n = 0} (Here prf) (H y)
+  = (p x).Cancelled prf y
+isVoid {p = p} {xs = (x :: xs)} {n = (S n)} (There tail) (T y)
+  = isVoid tail y
 
 
 public export
@@ -67,7 +70,7 @@ holdsAt : {is : _} -> {0 item : k -> Type}
              -> Positive.Dec (HOLDSAT p xs n)
 holdsAt f [] n
   = Left Empty
-holdsAt f (x :: y) 0 with (decideE $ f x)
+holdsAt f (x :: y) 0 with (f x)
   holdsAt f (x :: y) 0 | (Left z)
     = Left (H z)
   holdsAt f (x :: y) 0 | (Right z)

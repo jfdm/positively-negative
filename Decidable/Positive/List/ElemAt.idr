@@ -39,11 +39,11 @@ namespace List
   isVoid : HoldsAt    Positive p xs n
         -> HoldsAtNot Negative p xs n
         -> Void
-  isVoid {p = p} {xs = (x :: xs)} {n = 0} (Here prfP) (H prfN) with (p x)
-    isVoid {p = p} {xs = (x :: xs)} {n = 0} (Here prfP) (H prfN) | (D pos neg cancelled)
-      = cancelled prfP prfN
+  isVoid {p = p} {xs = (x :: xs)} {n = 0} (Here prfP) (H prfN)
+    = (p x).Cancelled prfP prfN
 
-  isVoid {p = p} {xs = (x :: xs)} {n = (S n)} (There lP) (T lN) = isVoid lP lN
+  isVoid {p = p} {xs = (x :: xs)} {n = (S n)} (There lP) (T lN)
+    = isVoid lP lN
 
 
   public export
@@ -63,18 +63,18 @@ namespace List
                -> Positive.Dec (HOLDSAT p xs n)
   holdsAt f [] Z
     = Left E
-  holdsAt f (x :: xs) Z with (decideE $ f x)
-    holdsAt f (x :: xs) Z | (Left y)
-      = Left (H y)
-    holdsAt f (x :: xs) Z | (Right y)
-      = Right (Here y)
+
+  holdsAt f (x :: xs) Z
+    = either (Left . H)
+             (Right . Here)
+             (f x)
+
   holdsAt f [] (S k)
     = Left E
-  holdsAt f (x :: xs) (S k) with (holdsAt f xs k)
-    holdsAt f (x :: xs) (S k) | (Left y)
-      = Left (T y)
-    holdsAt f (x :: xs) (S k) | (Right y)
-      = Right (There y)
 
+  holdsAt f (x :: xs) (S k)
+    = either (Left . T)
+             (Right . There)
+             (holdsAt f xs k)
 
 -- [ EOF ]

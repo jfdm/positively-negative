@@ -33,9 +33,8 @@ data HasKey : (p : String -> Decidable)
 isVoidHK : HasKey p Positive i
         -> HasKey p Negative i
         -> Void
-isVoidHK {p = p} {i = I k v} (HK po) (HK ne) with (p k)
-  isVoidHK {p = p} {i = I k v} (HK po) (HK ne) | (D pos neg cancelled)
-    = cancelled po ne
+isVoidHK {p = p} {i = I k v} (HK po) (HK ne)
+  = (p k).Cancelled po ne
 
 public export
 HASKEY : (p    : String -> Decidable)
@@ -50,11 +49,10 @@ export
 hasKey : (f : (k : String) -> Positive.Dec (p k))
       -> (item : Item ty)
               -> Positive.Dec (HASKEY p item)
-hasKey f (I str x) with (decideE $ f str)
-  hasKey f (I str x) | (Left y)
-    = Left (HK y)
-  hasKey f (I str x) | (Right y)
-    = Right (HK y)
+hasKey f (I str x)
+  = either (Left  . HK)
+           (Right . HK)
+           (f str)
 
 public export
 data Holds : {ty : kind}
@@ -87,12 +85,10 @@ data HoldsNot : {ty : kind}
 isVoidU : Holds    pK pI Positive item
        -> HoldsNot pK pI Negative item
        -> Void
-isVoidU {pK = pK} {item = (I key (Val value))} (H prfK prfV) (WrongKey prfKey) with (pK key)
-  isVoidU {pK = pK} {item = (I key (Val value))} (H prfK prfV) (WrongKey prfKey) | (D pos neg cancelled)
-    = cancelled prfK prfKey
-isVoidU {pI = pI} {item = (I key (Val value))} (H prfK prfV) (WrongItem prfValue) with (pI value)
-  isVoidU {pI = pI} {item = (I key (Val value))} (H prfK prfV) (WrongItem prfValue) | (D pos neg cancelled)
-    = cancelled prfV prfValue
+isVoidU {pK = pK} {item = (I key (Val value))} (H prfK prfV) (WrongKey prfKey)
+  = (pK key).Cancelled prfK prfKey
+isVoidU {pI = pI} {item = (I key (Val value))} (H prfK prfV) (WrongItem prfValue)
+  = (pI value).Cancelled prfV prfValue
 
 public export
 HOLDS : (pK : (type : String) -> Decidable)
@@ -105,20 +101,16 @@ HOLDS p k i
       (HoldsNot p k Negative i)
       isVoidU
 
-
 export
 holds : (f : (x : String) -> Positive.Dec (p x))
      -> (g : (x : typeS) -> Positive.Dec (q x))
      -> (x : Item type)
           -> Positive.Dec (HOLDS p q x)
-holds f g (I k (Val v)) with (decideE $ f k)
-  holds f g (I k (Val v)) | (Left x)
-    = Left (WrongKey x)
-  holds f g (I k (Val v)) | (Right x) with (decideE $ g v)
-    holds f g (I k (Val v)) | (Right x) | (Left y)
-      = Left (WrongItem y)
-    holds f g (I k (Val v)) | (Right x) | (Right y)
-      = Right (H x y)
-
+holds f g (I k (Val v))
+  = either (Left . WrongKey)
+           (\pH => either (Left  . WrongItem)
+                          (Right . H pH)
+                          (g v))
+           (f k)
 
 -- [ EOF ]

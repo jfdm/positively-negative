@@ -36,13 +36,6 @@ canVoid : forall x,y
 canVoid (Same z) Refl
   = believe_me {b = Void} ()
 
---public export
---HAS_EQUALITY String where
---  Positive = (AreEqual Positive)
---  Negative = (AreEqual Negative)
---  Cancelled = isVoid
---  toRefl = canRefl
---  toVoid = canVoid
 
 public export
 DecEQ String where

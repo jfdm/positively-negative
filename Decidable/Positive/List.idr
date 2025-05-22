@@ -44,7 +44,8 @@ namespace Equality
   public export
   data AreEqual : (p : a -> a -> Decidable) -> List a -> List a -> Type where
     Here : AreEqual p Nil Nil
-    There : {0 p : a -> a -> Decidable} -> (p x y).Positive
+    There : {0 p : a -> a -> Decidable}
+         -> (p x y).Positive
          -> AreEqual p xs ys
          -> AreEqual p (x::xs) (y::ys)
 
@@ -53,9 +54,14 @@ namespace Equality
     LeftHeavy  : AreEqualNot p (x::xs) Nil
     RightHeavy : AreEqualNot p Nil     (y::ys)
     RestNot : {0 p : a -> a -> Decidable} -> {x,y : a}
-         -> (p x y).Positive -> AreEqualNot p xs ys -> AreEqualNot p (x::xs) (y::ys)
-    HeadNot : {0 p : a -> a -> Decidable} ->  {x,y : a}
-         -> (p x y).Negative -> AreEqualNot p (x::xs) (y::ys)
+           -> (  p x y).Positive
+           -> AreEqualNot p     xs      ys
+           -> AreEqualNot p (x::xs) (y::ys)
+
+    HeadNot : {0 p : a -> a -> Decidable}
+          ->  { x,y : a}
+           -> (p x y).Negative
+            -> AreEqualNot p (x::xs) (y::ys)
 
   0
   prf : DecEQ a => {xs,ys : List a} -> AreEqual EQUAL xs ys -> AreEqualNot EQUAL xs ys -> Void
@@ -64,8 +70,10 @@ namespace Equality
   prf Here (RestNot x y) impossible
   prf Here (HeadNot x) impossible
 
-  prf {xs = (x :: xs)} {ys = (y :: ys)} (There pos z) (RestNot w v) = prf z v
-  prf {xs = (x :: xs)} {ys = (y :: ys)} (There pos z) (HeadNot w) = (EQUAL x y).Cancelled pos w
+  prf {xs = (x :: xs)} {ys = (y :: ys)} (There pos z) (RestNot w v)
+    = prf z v
+  prf {xs = (x :: xs)} {ys = (y :: ys)} (There pos z) (HeadNot w)
+    = (EQUAL x y).Cancelled pos w
 
   asRefl : DecEQ a => {xs, ys : List a} -> AreEqual EQUAL xs ys -> Equal xs ys
   asRefl Here = Refl
@@ -86,26 +94,28 @@ namespace Equality
   public export
   DecEQ a => DecEQ (List a) where
 
-    EQUAL x y = D (AreEqual EQUAL x y) (AreEqualNot EQUAL x y) prf
+    EQUAL x y
+      = D (AreEqual    EQUAL x y)
+          (AreEqualNot EQUAL x y)
+          prf
 
     toRefl = asRefl
     toVoid = asVoid
 
-    decEq [] [] = Right Here
+    decEq [] []
+      = Right Here
 
-    decEq [] (x :: xs) = Left RightHeavy
+    decEq [] (x :: xs)
+      = Left RightHeavy
 
-    decEq (x :: xs) [] = Left LeftHeavy
+    decEq (x :: xs) []
+      = Left LeftHeavy
 
-    decEq (x :: xs) (y :: ys) with (decideE $ decEq x y)
-      decEq (x :: xs) (y :: ys) | (Left z)
-        = Left (HeadNot z)
-
-      decEq (x :: xs) (y :: ys) | (Right h) with (decEq xs ys)
-        decEq (x :: xs) (y :: ys) | (Right h) | (Left tnot)
-          = Left (RestNot h tnot)
-
-        decEq (x :: xs) (y :: ys) | (Right h) | (Right t)
-          = Right (There h t)
+    decEq (x :: xs) (y :: ys)
+       =  either  (Left . HeadNot)
+                  (\h => either (Left . RestNot h)
+                                (Right . There h)
+                                (decEq xs ys))
+                  (decEq x y)
 
 -- [ EOF ]

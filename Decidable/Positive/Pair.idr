@@ -35,9 +35,10 @@ namespace First
   onFirst : (f : (x : type) -> Positive.Dec (p x))
          -> (x : (type,b))
               -> Positive.Dec (ONFIRST p x)
-  onFirst f (x, y) with (decideE $ f x)
-    onFirst f (x, y) | (Left z) = Left (Holds z)
-    onFirst f (x, y) | (Right z) = Right (Holds z)
+  onFirst f (x, y)
+    = either (Left  . Holds)
+             (Right . Holds)
+             (f x)
 
 
 namespace Second
@@ -56,9 +57,8 @@ namespace Second
   no : OnSecond p Positive Negative x
     -> OnSecond p Negative Positive x
     -> Void
-  no {p = p} {x = (f, s)} (Holds y) (Holds n) with (p s)
-    no {p = p} {x = (f, s)} (Holds y) (Holds n) | (D po ne cancelled)
-      = cancelled y n
+  no {p = p} {x = (f, s)} (Holds y) (Holds n)
+    = (p s).Cancelled  y n
 
   public export
   ONSECOND : (p : s -> Decidable) -> (x : (f,s)) -> Decidable
@@ -71,9 +71,10 @@ namespace Second
   onSecond : (f : (x : type) -> Positive.Dec (p x))
          -> (x : (a,type))
               -> Positive.Dec (ONSECOND p x)
-  onSecond f (x, y) with (decideE $ f y)
-    onSecond f (x, y) | (Left z) = Left (Holds z)
-    onSecond f (x, y) | (Right z) = Right (Holds z)
+  onSecond f (x, y)
+    = either (Left  . Holds)
+             (Right . Holds)
+             (f y)
 
 namespace Both
 
@@ -107,13 +108,11 @@ namespace Both
   no : Both    f s Positive p
     -> BothNot f s Negative p
     -> Void
-  no {p = (x, y)} {f = f} {s = s} (B pF pS) (BF nF) with (f x)
-    no {p = (x, y)} {f = f} {s = s} (B pF pS) (BF nF) | (D po ne cancelled)
-      = cancelled pF nF
+  no {p = (x, y)} {f = f} {s = s} (B pF pS) (BF nF)
+    = (f x).Cancelled pF nF
 
-  no {p = (x, y)} {f = f} {s = s} (B pF pS) (BS nS) with (s y)
-    no {p = (x, y)} {f = f} {s = s} (B pF pS) (BS nS) | (D po ne cancelled)
-      = cancelled pS nS
+  no {p = (x, y)} {f = f} {s = s} (B pF pS) (BS nS)
+    = (s y).Cancelled pS nS
 
   public export
   BOTH : (f : typeF -> Decidable)
@@ -131,12 +130,11 @@ namespace Both
       -> (g : (x : typeS) -> Positive.Dec (q x))
       -> (x : Pair typeF typeS)
            -> Positive.Dec (BOTH p q x)
-  both f g (x, y) with (decideE $ f x)
-    both f g (x, y) | (Left z) = Left (BF z)
-    both f g (x, y) | (Right z) with (decideE $ g y)
-      both f g (x, y) | (Right z) | (Left w)
-        = Left (BS w)
-      both f g (x, y) | (Right z) | (Right w)
-        = Right (B z w)
+  both f g (x, y)
+    = either (Left . BF)
+             (\res => either (Left . BS)
+                             (Right . B res)
+                              (g y))
+             (f x)
 
 -- [ EOF ]

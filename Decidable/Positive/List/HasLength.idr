@@ -44,11 +44,10 @@ hasLength 0 (x :: xs)
   = Left MoreElems
 hasLength (S k) []
   = Left MoreSize
-hasLength (S k) (x :: xs) with (hasLength k xs)
-  hasLength (S k) (x :: xs) | (Left y)
-    = Left (Step y)
-  hasLength (S k) (x :: xs) | (Right y)
-    = Right (S y)
+hasLength (S k) (x :: xs)
+  = either (Left . Step)
+           (Right . S)
+           (hasLength k xs)
 
 public export
 HASLENGTHNOT : (n  : Nat)

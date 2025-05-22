@@ -44,10 +44,9 @@ index 0 (x :: xs)
 index n []
   = Left HereN
 
-index (S k) (x :: xs) with (index k xs)
-  index (S k) (x :: xs) | (Left y)
-    = Left (ThereN y)
-  index (S k) (x :: xs) | (Right y)
-    = Right (There y)
+index (S k) (x :: xs)
+  = either (Left  . ThereN)
+           (Right . There)
+           (index k xs)
 
 -- [ EOF ]

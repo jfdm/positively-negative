@@ -67,28 +67,28 @@ namespace Relation
                 -> Positive.Dec (Relation.ALL p xs)
   all f []
     = Right Empty
-  all f (x :: xs) with (Quantify.all (f x) xs)
-    all f (x :: xs) | (Left y)
-      = Left (Here y)
-    all f (x :: xs) | (Right y) with (Relation.all f xs)
-      all f (x :: xs) | (Right y) | (Left z) = Left (There y z)
-      all f (x :: xs) | (Right y) | (Right z) = Right (Cons y z)
+  all f (x :: xs)
+    = either (Left . Here)
+             (\prfH => either (Left  . There prfH)
+                              (Right . Cons prfH)
+                              (Relation.all f xs))
+             (Quantify.all (f x) xs)
 
 public export
-FRESHEQ : Positive.DecEq a => (xs : List a) -> Decidable
-FRESHEQ = ALL DECEQIN
+FRESHEQ : DecEQ a => (xs : List a) -> Decidable
+FRESHEQ = ALL (\x,y => Not $ EQUAL x y)
 
 export
-freshByEQ : Positive.DecEq a => (xs : List a) -> Positive.Dec (FRESHEQ xs)
-freshByEQ = all decEqN
+freshByEQ : DecEQ a => (xs : List a) -> Positive.Dec (FRESHEQ xs)
+freshByEQ = all (\x,y => not $ decEq x y)
 
 public export
-SAMEEQ : Positive.DecEq type => (xs : List type)
+SAMEEQ : DecEQ type => (xs : List type)
     -> Decidable
-SAMEEQ  = ALL DECEQ
+SAMEEQ  = ALL EQUAL
 
 export
-sameByEQ : Positive.DecEq a => (xs : List a) -> Positive.Dec (SAMEEQ xs)
+sameByEQ : DecEQ a => (xs : List a) -> Positive.Dec (SAMEEQ xs)
 sameByEQ = all decEq
 
 

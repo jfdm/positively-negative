@@ -12,9 +12,8 @@ namespace Quantify
      -> Any p Positive Negative xs
      -> All p Negative Positive xs
      -> Void
-  prf {p} {xs=x::xs} (Here neg) (Extend pos rest) with (p x)
-    prf {p = p} {xs=x::xs} (Here neg) (Extend pos rest) | (D positive negative cancelled)
-      = cancelled neg pos
+  prf {p} {xs=x::xs} (Here neg) (Extend pos rest)
+    = (p x).Cancelled neg pos
 
   prf {p} {xs=x::xs} (There pos rest) (Extend neg later)
     = Quantify.prf rest later
@@ -34,14 +33,12 @@ namespace Quantify
   any f []
     = Left Empty
 
-  any f (x :: xs) with (decideE (f x))
-    any f (x :: xs) | (Left y) with (Quantify.any f xs)
-      any f (x :: xs) | (Left y) | (Left z)
-        = Left (Extend y z)
-      any f (x :: xs) | (Left y) | (Right z)
-        = Right (There y z)
-    any f (x :: xs) | (Right y)
-      = Right (Here y)
+  any f (x :: xs)
+    = either (\noH => either (Left . Extend noH)
+                             (Right . There noH)
+                             (Quantify.any f xs))
+             (Right . Here)
+             (f x)
 
   export
   showANY : (f : {x : _} -> Positive (p x) -> String)

@@ -45,11 +45,11 @@ isVoid : {p : {i : type} -> (x : item i) -> Decidable}
       -> Any item Negative Positive p xs
       -> All item Negative Positive p xs
       -> Void
-isVoid {p = p} {xs = (x :: xs)} (Here pP) (Extend pF tail) with (p x)
-  isVoid {p = p} {xs = (x :: xs)} (Here pP) (Extend pF tail) | (D pos neg cancelled)
-    = cancelled pP pF
+isVoid {p = p} {xs = (x :: xs)} (Here pP) (Extend pF tail)
+    = (p x).Cancelled pP pF
 
-isVoid {p = p} {xs = (x :: xs)} (There prf tail) (Extend y z) = isVoid tail z
+isVoid {p = p} {xs = (x :: xs)} (There prf tail) (Extend y z)
+  = isVoid tail z
 
 public export
 ANY : (item : type -> Type)
@@ -69,12 +69,11 @@ any : {0 is : List type}
          -> Positive.Dec (ANY item p xs)
 any f []
   = Left Empty
-any f (x :: y) with (decideE $ f x)
-  any f (x :: y) | (Left z) with (any f y)
-    any f (x :: y) | (Left z) | (Left w)
-      = Left (Extend z w)
-    any f (x :: y) | (Left z) | (Right w)
-      = Right (There z w)
-  any f (x :: y) | (Right z) = Right (Here z)
+any f (x :: y)
+  = either (\nH => either (Left  . Extend nH)
+                          (Right . There nH)
+                          (any f y))
+           (Right . Here)
+           (f x)
 
 -- [ EOF ]

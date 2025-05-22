@@ -30,6 +30,11 @@ data AreEqualNot : Ty -> Ty -> Type where
   FA : AreEqualNot x a -> AreEqualNot (FUNC x y) (FUNC a b)
   FR : AreEqualNot y b -> AreEqualNot (FUNC x y) (FUNC a b)
 
+public export
+dup : (ty : Ty) -> AreEqual ty ty
+dup NAT = NN
+dup (FUNC x y) = FF (dup x) (dup y)
+
 helper : (e,f : Ty) -> String
 helper e f
   = "Expected:\n\n\{show e}\n\nbut given:\n\n\{show f}"
@@ -48,12 +53,14 @@ show {x = (FUNC x y)} {y = (FUNC a b)} (FA z)
 show {x = (FUNC x y)} {y = (FUNC a b)} (FR z)
   = "\{helper (FUNC x y) (FUNC a b)}\n\nSpecifically, the return type differs:\n\n\{Types.show z}"
 
+public export
 symEQN : Types.AreEqualNot a b -> Types.AreEqualNot b a
 symEQN NF = FN
 symEQN FN = NF
 symEQN (FA x) = FA (symEQN x)
 symEQN (FR x) = FR (symEQN x)
 
+public export
 isVoid : AreEqual x y -> Types.AreEqualNot x y -> Void
 isVoid NN NF impossible
 isVoid NN (FA z) impossible
@@ -70,6 +77,7 @@ isEq (FF z w) with (isEq z)
   isEq (FF z w) | Refl with (isEq w)
     isEq (FF z w) | Refl | Refl = Refl
 
+export
 isNeg : Types.AreEqualNot x y
      -> Equal x y
      -> Void
@@ -80,16 +88,7 @@ isNeg (FR z) Refl with (isNeg z)
   isNeg (FR z) Refl | boom
     = boom Refl
 
---public export
---HAS_EQUALITY Ty where
---  Positive = AreEqual
---  Negative = AreEqualNot
---  Cancelled = isVoid
---  toRefl = isEq
---  toVoid = isNeg
-
-
-export
+public export
 DecEQ Ty where
 
   EQUAL x y = D (AreEqual x y) (AreEqualNot x y) isVoid
@@ -155,5 +154,6 @@ sameDomain (FF z w) = z
 public export
 sameDomainCo : AreEqual (FUNC a b) (FUNC x y) -> AreEqual b y
 sameDomainCo (FF z w) = w
+
 
 --[ EOF ]
