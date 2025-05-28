@@ -52,5 +52,8 @@ DecEQ String where
       = Right (Same z)
 
 
+export
+dup : (x : String) -> Positive (EQUAL x x)
+dup x = Same {t=Positive} {x=x} {y=x} (believe_me $ Data.So.Oh)
 
 -- [ EOF ]
