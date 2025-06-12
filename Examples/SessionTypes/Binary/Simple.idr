@@ -8,11 +8,14 @@ import public Decidable.Positive.String
 
 %default total
 
+data Action a = Send a (Action a)
+              | Recv a (Action a)
+              | Stop
 
-data Action : a -> Type where
-  Send : a -> Action a -> Action a
-  Recv : a -> Action a -> Action a
-  Stop : Action a
+--data Action : a -> Type where
+--  Send : a -> Action a -> Action a
+--  Recv : a -> Action a -> Action a
+--  Stop : Action a
 
 
 data Dual : (a    : Type)
@@ -168,6 +171,15 @@ DUAL' x  = D (Action _)
              (Dual    _ EQUAL Positive Negative x)
              (DualNot _ EQUAL Positive Negative x)
              cancelled'
+
+computeDual' : (x : Action String) -> DPair (Action String) (Positive.Dec . DUAL x)
+computeDual' (Send x y) with (computeDual' y)
+  computeDual' (Send x y) | (fst ** (Left z)) = (Recv x fst ** Left $ DSRLtr (dup x) z)
+  computeDual' (Send x y) | (fst ** (Right z)) = (Recv x fst ** Right $ DS (dup x) z)
+computeDual' (Recv x y) with (computeDual' y)
+  computeDual' (Recv x y) | (fst ** (Left z)) = (Send x fst ** Left $ DRSLtr (dup x) z)
+  computeDual' (Recv x y) | (fst ** (Right z)) = (Send x fst ** Right $ DR (dup x) z)
+computeDual' Stop = (Stop ** Right DF)
 
 computeDual : (x : Action String) -> Positive.DDec (DUAL' x)
 computeDual (Send x y) with (computeDual y)

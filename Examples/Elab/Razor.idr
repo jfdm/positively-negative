@@ -10,8 +10,7 @@ import Decidable.Positive.Nat
 import Decidable.Positive.Pair
 import Decidable.Positive.List.Assoc
 import Decidable.Positive.List.Elem
-import Decidable.Positive.List.Quantifier.All
-import Decidable.Positive.List.Quantifier.Any
+import Decidable.Positive.List.Quantifier
 
 
 %default total
@@ -68,7 +67,7 @@ elab xs (Add x y)
        pure (P x y)
 
 showIDX : Any p pos neg xs -> String
-showIDX x = Core.showAny (const "T") (const "H") x
+showIDX x = showAny (const "T") (const "H") x
 
 Show (Razor ctxt) where
   show (V x)
@@ -84,7 +83,7 @@ show {x} {s} (Same prf) = "Not Equal \{x} & \{s}"
 
 Show (Error xs) where
   show (Eek e) = show e
-  show (NotBound s prf) = "Not bound: \{s}\n\n Why:\n\n \{Core.showAll (\p => show p) prf}"
+  show (NotBound s prf) = "Not bound: \{s}\n\n Why:\n\n \{showAll (\p => show p) prf}"
 
 export
 run : AST -> IO ()

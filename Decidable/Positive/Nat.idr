@@ -40,6 +40,11 @@ namespace AreEqual
   toVoid (MoreBoth z) Refl with (toVoid z)
     toVoid (MoreBoth z) Refl | no = no Refl
 
+  self : (n : Nat) -> (AreEqual n n)
+  self Z
+    = Zero
+  self (S k) = Succ $ self k
+
   public export
   DecEQ Nat where
     EQUAL x y = D (AreEqual x y) (AreEqualNot x y) doCancel
@@ -59,6 +64,7 @@ namespace AreEqual
       decEq (S k) (S j) | (Right x)
         = Right (Succ x)
 
+    self = AreEqual.self
 
 public export
 data IsZero : Nat -> Type where

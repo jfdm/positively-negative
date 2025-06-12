@@ -11,8 +11,8 @@ import Decidable.Positive.Nat
 import Decidable.Positive.Pair
 import Decidable.Positive.List.Assoc
 import Decidable.Positive.List.Elem
-import Decidable.Positive.List.Quantifier.All
-import Decidable.Positive.List.Quantifier.Any
+import Decidable.Positive.List
+import Decidable.Positive.List
 
 public export
 data Item : type -> Type where

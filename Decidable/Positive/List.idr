@@ -91,6 +91,11 @@ namespace Equality
   asVoid {xs = (x :: xs)} {ys = (x :: xs)} (HeadNot hnot) Refl with (toVoid hnot)
     asVoid {xs = (x :: xs)} {ys = (x :: xs)} (HeadNot hnot) Refl | boom = boom Refl
 
+  self : DecEQ a => (xs : List a) -> AreEqual EQUAL xs xs
+  self [] = Here
+  self (x :: xs) = self x `There` (self xs)
+
+
   public export
   DecEQ a => DecEQ (List a) where
 
@@ -117,5 +122,5 @@ namespace Equality
                                 (Right . There h)
                                 (decEq xs ys))
                   (decEq x y)
-
+    self = List.Equality.self
 -- [ EOF ]

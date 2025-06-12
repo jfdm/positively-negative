@@ -2,8 +2,7 @@ module Decidable.Positive.List.Relation.All
 
 import        Decidable.Positive
 import public Decidable.Positive.Equality
-import public Decidable.Positive.List.Quantifier.All
-import public Decidable.Positive.List.Quantifier.Any
+import public Decidable.Positive.List.Quantifier
 
 %default total
 
@@ -47,7 +46,7 @@ namespace Relation
   prf Empty (There head tail) impossible
 
   prf {p} {xs=s::xs} (Cons hF tF) (Here x)
-    = All.Quantify.prf hF x
+    = All.prf hF x
   prf (Cons _ tF) (There _ tFN)
     = prf tF tFN
 
@@ -72,7 +71,7 @@ namespace Relation
              (\prfH => either (Left  . There prfH)
                               (Right . Cons prfH)
                               (Relation.all f xs))
-             (Quantify.all (f x) xs)
+             (All.all (f x) xs)
 
 public export
 FRESHEQ : DecEQ a => (xs : List a) -> Decidable

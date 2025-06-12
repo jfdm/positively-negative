@@ -14,8 +14,8 @@ import public Decidable.Positive.Nat
 import public Decidable.Positive.Pair
 import public Decidable.Positive.List.Assoc
 import public Decidable.Positive.List.Elem
-import public Decidable.Positive.List.Quantifier.All
-import public Decidable.Positive.List.Quantifier.Any
+import public Decidable.Positive.List
+import public Decidable.Positive.List.Quantifier
 
 import public Decidable.Positive.All.Any
 import public Decidable.Positive.All.AnyAt

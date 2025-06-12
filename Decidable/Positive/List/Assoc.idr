@@ -6,7 +6,7 @@ import        Decidable.Positive.Equality
 
 import public Decidable.Positive.Pair
 import public Decidable.Positive.DPair
-import public Decidable.Positive.List.Quantifier.Any
+import public Decidable.Positive.List.Quantifier
 
 %default total
 
@@ -15,7 +15,7 @@ HASKEY : (p  : key -> Decidable)
       -> (xs : List (key,value))
             -> Decidable
 HASKEY p
-  = Quantify.ANY (ONFIRST p)
+  = ANY (ONFIRST p)
 
 
 export
@@ -33,7 +33,7 @@ HOLDBOTH : (f : key   -> Decidable)
         -> (p : List (key,value))
              -> Decidable
 HOLDBOTH f s
-  = Quantify.ANY (BOTH f s)
+  = ANY (BOTH f s)
 
 export
 holdBoth : (f   : (x : key)   -> Positive.Dec (k x))
@@ -41,7 +41,7 @@ holdBoth : (f   : (x : key)   -> Positive.Dec (k x))
         -> (kvs : List (key,value))
                -> Positive.Dec (HOLDBOTH k v kvs)
 holdBoth f g
-  = Quantify.any (both f g)
+  = any (both f g)
 
 public export
 HOLDAT : DecEQ key
@@ -114,7 +114,6 @@ namespace Lookup
                       -> Type
     where
       Empty : ByKeyNot f pos neg x Nothing Nil
-
       Extend : {0 f   : (x,y : key) -> Decidable}
             -> (  pK  : pos (f x a))
             -> (  ltr : ByKeyNot f pos neg x y kvs)
@@ -156,8 +155,8 @@ namespace Lookup
 
   public export
   0
-  no' : ByKey    f Positive Negative k v kvs
-     -> ByKeyNot f Negative Positive k v kvs
+  no' : ByKey    f Positive Negative k (Just v) kvs
+     -> ByKeyNot f Negative Positive k Nothing kvs
      -> Void
   no' (Here pK) (Extend x ltr) = (f k _).Cancelled pK x
   no' (There pK ltr) (Extend x y) = no' ltr y
@@ -170,7 +169,13 @@ namespace Lookup
              -> Decidable
   ELEM k v kvs
     = D (ByKey    EQUAL Positive Negative k (Just v) kvs)
-        (ByKeyNot EQUAL Negative Positive k (Just v) kvs)
+        (ByKeyNot EQUAL Negative Positive k Nothing kvs)
         no'
+
+  public export
+  shift : {k : key} -> DecEQ key => (LOOKUP k kvs).Positive (Just v)
+       -> Positive (ELEM k v kvs)
+  shift (Here pK) = Here pK
+  shift (There pK ltr) = There pK (shift ltr)
 
 -- [ EOF ]

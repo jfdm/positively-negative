@@ -36,6 +36,10 @@ canVoid : forall x,y
 canVoid (Same z) Refl
   = believe_me {b = Void} ()
 
+export
+dup : (x : String) -> AreEqual Positive x x
+dup x = Same {t=Positive} {x=x} {y=x} (believe_me $ Data.So.Oh)
+
 
 public export
 DecEQ String where
@@ -51,9 +55,7 @@ DecEQ String where
     decEq x y | (Right z)
       = Right (Same z)
 
+  self = dup
 
-export
-dup : (x : String) -> Positive (EQUAL x x)
-dup x = Same {t=Positive} {x=x} {y=x} (believe_me $ Data.So.Oh)
 
 -- [ EOF ]

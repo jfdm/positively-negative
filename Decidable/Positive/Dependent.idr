@@ -4,7 +4,8 @@ import Decidable.Positive
 
 %default total
 
-namespace Positive
+namespace Dependent
+  namespace Positive
     public export
     record DDecidable where
       constructor D
@@ -15,9 +16,9 @@ namespace Positive
 
     public export
     DDec : DDecidable -> Type
-    DDec (D witness positive negative _)
-       = Either (DPair witness negative)
-                (DPair witness positive)
+    DDec d
+       = Either (DPair (witness d) (Negative d))
+                (DPair (witness d) (Positive d))
 
 
 -- [ EOF ]

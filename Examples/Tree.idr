@@ -219,3 +219,8 @@ DecEQ a => DecEQ (Tree a) where
           = Left (CmpNoRight prfR)
         decEq (Node x xl xr) (Node y yl yr) | (Right prfH) | (Right prfL) | (Right prfR)
           = Right (CmpT prfH prfL prfR)
+
+  self Leaf
+    = CmpH
+  self (Node x y z)
+    = CmpT (self x) (self y) (self z)

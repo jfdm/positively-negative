@@ -43,8 +43,8 @@ namespace Main
                            (\x => "(No \{show x})")
                            (Quantify.all (GreaterThan.isGT 3) [1,0,1]))
 
-         putStrLn "# Any (Wrong"
-         putStrLn "## (Wrong) exists an x \in [1,2,3], 3 > x"
+         putStrLn "# Any (Wrong)"
+         putStrLn "## (Wrong) exists an x \in [1,2,3], 3 > x\n"
          putStrLn (Wrong.showANY {p = GT 3}
                            (\x => "(Yes \{show x})")
                            (\x => "(No \{show x})")
@@ -63,7 +63,7 @@ namespace Main
                            (Any.Wrong.any (GreaterThan.isGT 3) [1,0,1]))
 
          putStrLn "# Any"
-         putStrLn "## exists an x \in [1,2,3], 3 > x"
+         putStrLn "## exists an x \in [1,2,3], 3 > x\n"
          putStrLn (Quantify.showANY {p = GT 3}
                            (\x => "(Yes \{show x})")
                            (\x => "(No \{show x})")
@@ -80,5 +80,19 @@ namespace Main
                            (\x => "(Yes \{show x})")
                            (\x => "(No \{show x})")
                            (Quantify.any (GreaterThan.isGT 3) [1,0,1]))
+
+
+
+         putStrLn "## W"
+         putStrLn (Wrong.showANY {p = GT 3}
+                           (\x => "(Yes \{show x})")
+                           (\x => "(No \{show x})")
+                           (Any.Wrong.any (GreaterThan.isGT 3) [1,2,3]))
+
+         putStrLn "## C"
+         putStrLn (Quantify.showANY {p = GT 3}
+                           (\x => "(Yes \{show x})")
+                           (\x => "(No \{show x})")
+                           (Quantify.any (GreaterThan.isGT 3) [1,2,3]))
 
 -- [ EOF ]

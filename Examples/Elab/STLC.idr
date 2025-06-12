@@ -11,8 +11,8 @@ import Decidable.Positive.Pair
 import Decidable.Positive.List.Assoc
 import Decidable.Positive.List.Elem
 import Decidable.Positive.List.ElemAt
-import Decidable.Positive.List.Quantifier.All
-import Decidable.Positive.List.Quantifier.Any
+import Decidable.Positive.List.Quantifier
+import Decidable.Positive.List.Quantifier
 
 import Examples.Context
 import Examples.Elab.STLC.Types
