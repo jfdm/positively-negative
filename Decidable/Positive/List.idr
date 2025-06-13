@@ -93,7 +93,7 @@ namespace Equality
 
   self : DecEQ a => (xs : List a) -> AreEqual EQUAL xs xs
   self [] = Here
-  self (x :: xs) = self x `There` (self xs)
+  self (x :: xs) = refl x `There` (self xs)
 
 
   public export
@@ -122,5 +122,8 @@ namespace Equality
                                 (Right . There h)
                                 (decEq xs ys))
                   (decEq x y)
-    self = List.Equality.self
+
+    refl = List.Equality.self
+
+    decEqNot x y = mirror (decEq x y)
 -- [ EOF ]

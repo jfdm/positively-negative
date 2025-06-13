@@ -55,7 +55,9 @@ DecEQ String where
     decEq x y | (Right z)
       = Right (Same z)
 
-  self = dup
+  decEqNot x y = mirror (decEq x y)
+
+  refl = dup
 
 
 -- [ EOF ]

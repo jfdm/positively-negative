@@ -117,7 +117,9 @@ DecEQ Ty where
       decEq (FUNC x z) (FUNC a b) | (Right vdom) | (Right vdomco)
         = Right (FF vdom vdomco)
 
-  self = dup
+  decEqNot x y = mirror (decEq x y)
+
+  refl = dup
 
 public export
 data IsFunc : Ty -> Type where

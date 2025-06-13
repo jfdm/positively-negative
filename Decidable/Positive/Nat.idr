@@ -64,7 +64,8 @@ namespace AreEqual
       decEq (S k) (S j) | (Right x)
         = Right (Succ x)
 
-    self = AreEqual.self
+    decEqNot x y = mirror (decEq x y)
+    refl = AreEqual.self
 
 public export
 data IsZero : Nat -> Type where

@@ -95,9 +95,8 @@ ANY p t = D (Any p Positive Negative t)
        -> {t : Tree type} -> Any p Positive Negative t
                           -> All p Negative Positive t
                          -> Void
-    prf {p = p} {t = (Node v left right)} (Here x) (Branch y prfL prfR) with (p v)
-      prf {p = p} {t = (Node v left right)} (Here x) (Branch y prfL prfR) | (D positive negative cancelled)
-        = cancelled x y
+    prf {p = p} {t = (Node v left right)} (Here x) (Branch y prfL prfR)
+        = (p v).Cancelled x y
     prf {p = p} {t = (Node v left right)} (ThereL x ltr) (Branch y prfL prfR)
       = prf ltr prfL
     prf {p = p} {t = (Node v left right)} (ThereR x ltr) (Branch y prfL prfR)
@@ -220,7 +219,9 @@ DecEQ a => DecEQ (Tree a) where
         decEq (Node x xl xr) (Node y yl yr) | (Right prfH) | (Right prfL) | (Right prfR)
           = Right (CmpT prfH prfL prfR)
 
-  self Leaf
+  decEqNot x y = mirror (decEq x y)
+
+  refl Leaf
     = CmpH
-  self (Node x y z)
-    = CmpT (self x) (self y) (self z)
+  refl (Node x y z)
+    = CmpT (refl x) (refl y) (refl z)
