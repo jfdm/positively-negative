@@ -24,13 +24,14 @@ modules = Decidable.Positive
         , Decidable.Positive.List.Relation.All
         , Decidable.Positive.List.Assoc
 
+        , Examples
         , Examples.Context.Item
         , Examples.Context
 
         , Examples.Elab.STLC.Types
         , Examples.Elab.STLC
         , Examples.Elab.Razor
-        , Examples.SessionTypes.Binary.Simple
+        , Examples.SessionTypes.Binary.ChoiceNo
 
         , Examples.Tree
 

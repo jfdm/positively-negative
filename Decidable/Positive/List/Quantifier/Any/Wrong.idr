@@ -1,8 +1,7 @@
 module Decidable.Positive.List.Quantifier.Any.Wrong
 
 import public Decidable.Positive
-import public Decidable.Positive.List.Quantifier.Core
-import public Decidable.Positive.List.Quantifier.All
+import public Decidable.Positive.List.Quantifier
 
 %default total
 
@@ -16,7 +15,7 @@ any : {p  : type -> Decidable}
    -> (f  : (x : type) -> Positive.Dec (p x))
    -> (xs : List type)
          -> Positive.Dec (Wrong.ANY p xs)
-any f xs = mirror (Quantify.all f xs)
+any f xs = mirror (All.all f xs)
 
 export
 showANY : (f : {x : _} -> Positive (p x) -> String)

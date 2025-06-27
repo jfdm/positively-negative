@@ -10,14 +10,17 @@ import public Decidable.Positive.String
 
 data Action a = Send a (Action a)
               | Recv a (Action a)
+              | Offer (Action a) (Action a)
+              | GoLeft (Action a)
+              | GoRight (Action a)
               | Stop
 
---data Action : a -> Type where
---  Send : a -> Action a -> Action a
---  Recv : a -> Action a -> Action a
---  Stop : Action a
+data Equal : (a -> a -> Decidable)
+          -> (this, that : Action a)
+          -> Type
 
-
+  where
+{-
 data Dual : (a    : Type)
          -> (pred : a -> a -> Decidable)
          -> (pos  : Decidable -> Type)
@@ -190,3 +193,4 @@ computeDual (Recv x y) with (computeDual y)
   computeDual (Recv x y) | (Right (fst ** snd)) = Right (Send x fst ** DR (dup x) snd)
 
 computeDual Stop = Right (Stop ** DF)
+-}

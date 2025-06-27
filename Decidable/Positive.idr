@@ -16,26 +16,6 @@ Show : Decidable -> Type
 Show d
   = (Show (d.Positive), Show (d.Negative))
 
-public export
-swap : (no  : p -> n -> Void)
-          -> (n -> p -> Void)
-swap no x y = no y x
-
-public export
-negSym : (no  : p -> n -> Void)
-            -> (n -> p -> Void)
-negSym no x y = no y x
-
-public export
-Not : Decidable -> Decidable
-Not (D p n no)
-  = D n p (negSym no)
-
-public export
-Swap : Decidable -> Decidable
-Swap d
-  = D d.Negative d.Positive (negSym d.Cancelled)
-
 
 ||| This function is entirely Bob's idea.
 public export
@@ -56,10 +36,40 @@ Show d => Show (Positive.Dec d) where
   show x = Positive.show x
 
 public export
-force : Positive.Dec this
-     -> Either (this.Negative) (this.Positive)
-force x {this} with 0 (this)
-  force x {this} | (D positive negative cancelled) = x
+swap : (no  : p -> n -> Void)
+          -> (n -> p -> Void)
+swap no x y = no y x
+
+public export
+negSym : (no  : p -> n -> Void)
+            -> (n -> p -> Void)
+negSym no x y = no y x
+
+public export
+Not : Decidable -> Decidable
+Not d
+  = D d.Negative d.Positive (negSym d.Cancelled)
+
+public export
+Swap : Decidable -> Decidable
+Swap = Not
+
+public export
+Mirror : Decidable -> Decidable
+Mirror = Not
+
+public export
+not : Positive.Dec this
+   -> Positive.Dec (Swap this)
+not = mirror
+
+
+{- [ NOTE ] Anti-pattern
+
+public export
+Not : Decidable -> Decidable
+Not (D p n no)
+  = D n p (negSym no)
 
 public export
 not : Positive.Dec this
@@ -67,5 +77,5 @@ not : Positive.Dec this
 not x with 0 (this) -- required to unroll things
   not (Left x) | (D positive negative cancelled) = Right x
   not (Right x) | (D positive negative cancelled) = Left x
-
+-}
 -- [ EOF ]

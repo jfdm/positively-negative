@@ -5,8 +5,7 @@ import Decidable.Positive.Equality
 import Decidable.Positive.Nat
 import Decidable.Positive.List
 import Decidable.Positive.List.Elem
-import Decidable.Positive.List.Quantifier.All
-import Decidable.Positive.List.Quantifier.Any
+import Decidable.Positive.List.Quantifier
 import Decidable.Positive.List.Quantifier.Any.Wrong
 
 %default total
@@ -29,19 +28,19 @@ namespace Main
          putStrLn (showALL {p = GT 3}
                            (\x => "(Yes \{show x})")
                            (\x => "(No \{show x})")
-                           (Quantify.all (GreaterThan.isGT 3) [1,2,3]))
+                           (all (GreaterThan.isGT 3) [1,2,3]))
 
          putStrLn "## forall x \in [4,5,6], 3 > x"
          putStrLn (showALL {p = GT 3}
                            (\x => "(Yes \{show x})")
                            (\x => "(No \{show x})")
-                           (Quantify.all (GreaterThan.isGT 3) [4,5,6]))
+                           (all (GreaterThan.isGT 3) [4,5,6]))
 
          putStrLn "## forall x \in [1,0,1], 3 > x"
          putStrLn (showALL {p = GT 3}
                            (\x => "(Yes \{show x})")
                            (\x => "(No \{show x})")
-                           (Quantify.all (GreaterThan.isGT 3) [1,0,1]))
+                           (all (GreaterThan.isGT 3) [1,0,1]))
 
          putStrLn "# Any (Wrong)"
          putStrLn "## (Wrong) exists an x \in [1,2,3], 3 > x\n"
@@ -64,22 +63,22 @@ namespace Main
 
          putStrLn "# Any"
          putStrLn "## exists an x \in [1,2,3], 3 > x\n"
-         putStrLn (Quantify.showANY {p = GT 3}
+         putStrLn (Any.showANY {p = GT 3}
                            (\x => "(Yes \{show x})")
                            (\x => "(No \{show x})")
-                           (Quantify.any (GreaterThan.isGT 3) [1,2,3]))
+                           (any (GreaterThan.isGT 3) [1,2,3]))
 
          putStrLn "## exists an x \in [4,5,6], 3 > x"
-         putStrLn (Quantify.showANY {p = GT 3}
+         putStrLn (Any.showANY {p = GT 3}
                            (\x => "(Yes \{show x})")
                            (\x => "(No \{show x})")
-                           (Quantify.any (GreaterThan.isGT 3) [4,5,6]))
+                           (any (GreaterThan.isGT 3) [4,5,6]))
 
          putStrLn "## exists an x \in [1,0,1], 3 > x"
-         putStrLn (Quantify.showANY {p = GT 3}
+         putStrLn (Any.showANY {p = GT 3}
                            (\x => "(Yes \{show x})")
                            (\x => "(No \{show x})")
-                           (Quantify.any (GreaterThan.isGT 3) [1,0,1]))
+                           (any (GreaterThan.isGT 3) [1,0,1]))
 
 
 
@@ -90,9 +89,9 @@ namespace Main
                            (Any.Wrong.any (GreaterThan.isGT 3) [1,2,3]))
 
          putStrLn "## C"
-         putStrLn (Quantify.showANY {p = GT 3}
+         putStrLn (Any.showANY {p = GT 3}
                            (\x => "(Yes \{show x})")
                            (\x => "(No \{show x})")
-                           (Quantify.any (GreaterThan.isGT 3) [1,2,3]))
+                           (any (GreaterThan.isGT 3) [1,2,3]))
 
 -- [ EOF ]
