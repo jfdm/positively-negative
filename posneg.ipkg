@@ -25,6 +25,7 @@ modules = Decidable.Positive
         , Decidable.Positive.List.Assoc
 
         , Examples
+        , Examples.Filter
         , Examples.Context.Item
         , Examples.Context
 
