@@ -2,8 +2,8 @@ module Decidable.Positive.List.Elem
 
 import        Decidable.Positive
 import public Decidable.Positive.Equality
-import public Decidable.Positive.List.Quantifier
-import public Decidable.Positive.List.Quantifier
+import public Decidable.Positive.List.Quantifier.Wrong
+import public Decidable.Positive.Nat
 
 %default total
 

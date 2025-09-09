@@ -25,10 +25,12 @@ data Any : (pred : (value : type) -> Decidable)
                 -> Type
   where
     Here : {x   : type}
+        -> {0 p  : type -> Decidable}
         -> (prf : Positive (p x))
                -> Any p (x::xs)
 
     There : {x : type}
+         -> {0 p  : type -> Decidable}
          -> (prf : Negative (p x))
          -> (rest : Any p     xs)
                  -> Any p (x::xs)
@@ -43,11 +45,13 @@ prf Empty (There x rest) impossible
 prf (Extend pos rest) (Here neg) = (p _).Cancelled pos neg
 prf (Extend pos rest) (There neg ltr) = prf rest ltr
 
+public export
 ALL : (p : type -> Decidable) -> (xs : List type) -> Decidable
 ALL p xs = D (All p xs)
              (Any (Swap . p) xs)
              prf
 
+export
 all : (f  : (x : type) -> Positive.Dec (p x))
      -> (xs : List type)
            -> Positive.Dec (ALL p xs)
@@ -58,10 +62,11 @@ all f (x :: xs) with (f x)
     all f (x :: xs) | (Right y) | (Left z) = Left (There y z)
     all f (x :: xs) | (Right y) | (Right z) = Right (Extend y z)
 
-
+public export
 ANY : (p : type -> Decidable) -> (xs : List type) -> Decidable
 ANY p xs = Swap (ALL (Swap . p) xs)
 
+export
 any : (f  : (x : type) -> Positive.Dec (p x))
    -> (xs : List type)
          -> Positive.Dec (ANY (p) xs)
