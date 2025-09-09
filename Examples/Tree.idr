@@ -185,6 +185,7 @@ asREFL (CmpT prf prfL prfR) with (toRefl prf)
     asREFL (CmpT prf prfL prfR) | Refl | Refl with (asREFL prfR)
       asREFL (CmpT prf prfL prfR) | Refl | Refl | Refl = Refl
 
+0
 asVOID : DecEQ a => {x,y : Tree a} -> TreeCmp2Not EQUAL x y -> Equal x y -> Void
 asVOID CmpHeavyL Refl impossible
 asVOID CmpHeavyR Refl impossible
@@ -218,8 +219,6 @@ DecEQ a => DecEQ (Tree a) where
           = Left (CmpNoRight prfR)
         decEq (Node x xl xr) (Node y yl yr) | (Right prfH) | (Right prfL) | (Right prfR)
           = Right (CmpT prfH prfL prfR)
-
-  decEqNot x y = mirror (decEq x y)
 
   refl Leaf
     = CmpH

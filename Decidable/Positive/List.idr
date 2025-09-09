@@ -81,6 +81,7 @@ namespace Equality
     asRefl (There x y) | Refl with (asRefl y)
       asRefl (There x y) | Refl | Refl = Refl
 
+  0
   asVoid : DecEQ a => {xs, ys : List a} -> AreEqualNot EQUAL xs ys -> Equal xs ys -> Void
   asVoid LeftHeavy Refl impossible
   asVoid RightHeavy Refl impossible
@@ -125,5 +126,4 @@ namespace Equality
 
     refl = List.Equality.self
 
-    decEqNot x y = mirror (decEq x y)
 -- [ EOF ]

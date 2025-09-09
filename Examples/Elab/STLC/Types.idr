@@ -17,11 +17,16 @@ Show Ty where
 public export
 data AreEqual : Ty -> Ty -> Type where
   NN : AreEqual NAT NAT
-  FF : AreEqual x a -> AreEqual y b -> AreEqual (FUNC x y) (FUNC a b)
+  FF : AreEqual       x          a
+    -> AreEqual         y          b
+    -> AreEqual (FUNC x y) (FUNC a b)
 
-symEQ : Types.AreEqual a b -> Types.AreEqual b a
-symEQ NN = NN
-symEQ (FF x y) = FF (symEQ x) (symEQ y)
+symEQ : Types.AreEqual a b
+     -> Types.AreEqual b a
+symEQ NN
+  = NN
+symEQ (FF x y)
+  = FF (symEQ x) (symEQ y)
 
 public export
 data AreEqualNot : Ty -> Ty -> Type where
@@ -116,8 +121,6 @@ DecEQ Ty where
 
       decEq (FUNC x z) (FUNC a b) | (Right vdom) | (Right vdomco)
         = Right (FF vdom vdomco)
-
-  decEqNot x y = mirror (decEq x y)
 
   refl = dup
 

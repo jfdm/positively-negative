@@ -46,10 +46,10 @@ elab : (xs : List String)
     -> AST
     -> Either (Error xs)
               (Razor xs)
-elab xs (Var str) with (isElem str xs)
-  elab xs (Var str) | (Left err) = Left (NotBound str err)
-  elab xs (Var str) | (Right x) = Right (V x)
-
+elab xs (Var str)
+  = either (Left. NotBound str)
+           (Right . V)
+           (isElem str xs)
 
 elab xs (Let str v b)
   = do v <- elab xs v
@@ -78,8 +78,8 @@ Show (Razor ctxt) where
   show (P x y)
     = "(\{show x} + \{show y})"
 
-show : {s,x : String} -> AreEqual Negative s x -> String
-show {x} {s} (Same prf) = "Not Equal \{x} & \{s}"
+show : {s,x : String} -> (EQUALNOT s x).Positive -> String
+show {x} {s} (BinOpRes prf) = "Not Equal \{x} & \{s}"
 
 Show (Error xs) where
   show (Eek e) = show e

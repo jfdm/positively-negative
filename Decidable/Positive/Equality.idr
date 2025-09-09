@@ -8,31 +8,48 @@ namespace Positive
 
     EQUAL : (x,y : type) -> Decidable
 
-    EQUALNOT : (x,y : type) -> Decidable
-    EQUALNOT x y = Swap (EQUAL x y)
-
-
     toRefl : {x,y : type}
           -> (EQUAL x y).Positive
           -> Equal x y
 
+    0
     toVoid : {x,y : type}
           -> (EQUAL x y).Negative
           -> Equal x y
           -> Void
 
-    decEq    : (x,y : type) -> Positive.Dec (EQUAL    x y)
-    decEqNot : (x,y : type) -> Positive.Dec (EQUALNOT x y)
+    decEq    : (x,y : type) -> Positive.Dec (EQUAL x y)
 
     refl : (x : type) -> Positive (EQUAL x x)
 
+  namespace Not
 
+    public export
+    EQUALNOT : DecEQ type => (x,y : type) -> Decidable
+    EQUALNOT x y = Swap (EQUAL x y)
 
-    -- need to return Positive version
+    export
+    decEqNot : DecEQ type
+            => (x,y : type) -> Positive.Dec (EQUALNOT x y)
+    decEqNot x y = mirror (decEq x y)
+
 namespace Practical
+
   export
-  decEq' : DecEQ type => (x,y : type) -> Either ((EQUAL x y).Negative) (x = y)
-  decEq' x y = either Left (Right . toRefl) (Positive.decEq x y)
+  reflRefl : DecEQ type
+          => (x : type)
+          -> (x = x)
+  reflRefl x = toRefl $ refl x
+
+  export
+  decEq' : DecEQ type
+          => (x,y : type)
+                 -> Either (Negative (EQUAL x y))
+                           (x = y)
+  decEq' x y
+    = either Left
+             (Right . toRefl)
+             (decEq x y)
 
 
 -- [ EOF ]

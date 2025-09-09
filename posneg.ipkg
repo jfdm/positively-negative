@@ -3,6 +3,7 @@ package posneg
 modules = Decidable.Positive
         , Decidable.Positive.Equality
         , Decidable.Positive.Equality.Propositional
+        , Decidable.Positive.Builtin
 
         , Decidable.Positive.So
         , Decidable.Positive.Nat
