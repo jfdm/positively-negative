@@ -37,7 +37,9 @@ HASLENGTH n xs
       (prfHasLengthVoid)
 
 export
-hasLength : (n : Nat) -> (xs : List a) -> Positive.Dec (HASLENGTH n xs)
+hasLength : (n  : Nat)
+         -> (xs : List a)
+               -> Positive.Dec (HASLENGTH n xs)
 hasLength 0 []
   = Right Z
 hasLength 0 (x :: xs)
@@ -59,7 +61,9 @@ HASLENGTHNOT n xs
       (\x,y => prfHasLengthVoid y x)
 
 export
-hasLengthNot : (n : Nat) -> (xs : List a) -> Positive.Dec (HASLENGTHNOT n xs)
+hasLengthNot : (n  : Nat)
+            -> (xs : List a)
+                  -> Positive.Dec (HASLENGTHNOT n xs)
 hasLengthNot n xs
   = mirror (hasLength n xs)
 

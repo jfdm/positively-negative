@@ -22,7 +22,8 @@ prf : Index    n xs
    -> Void
 prf Here HereN impossible
 prf Here (ThereN x) impossible
-prf (There x) (ThereN y) = prf x y
+prf (There x) (ThereN y)
+  = prf x y
 
 
 public export

@@ -15,7 +15,7 @@ any : {p  : type -> Decidable}
    -> (f  : (x : type) -> Positive.Dec (p x))
    -> (xs : List type)
          -> Positive.Dec (Wrong.ANY p xs)
-any f xs = mirror (All.all f xs)
+any f xs = mirror (all f xs)
 
 export
 showANY : (f : {x : _} -> Positive (p x) -> String)

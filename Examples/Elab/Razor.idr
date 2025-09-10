@@ -66,7 +66,7 @@ elab xs (Add x y)
        y <- elab xs y
        pure (P x y)
 
-showIDX : Any p pos neg xs -> String
+showIDX : Any p xs -> String
 showIDX x = showAny (const "T") (const "H") x
 
 Show (Razor ctxt) where

@@ -47,8 +47,7 @@ negSym no x y = no y x
 
 public export
 Not : Decidable -> Decidable
-Not d
-  = D d.Negative d.Positive (negSym d.Cancelled)
+Not d = D (Negative d) (Positive d) (negSym (Cancelled d))
 
 public export
 Swap : Decidable -> Decidable
@@ -59,8 +58,8 @@ Mirror : Decidable -> Decidable
 Mirror = Not
 
 public export
-not : Positive.Dec this
-   -> Positive.Dec (Swap this)
+not : Positive.Dec      this
+   -> Positive.Dec (Not this)
 not = mirror
 
 

@@ -12,7 +12,6 @@ import Decidable.Positive.Pair
 import Decidable.Positive.List.Assoc
 import Decidable.Positive.List.Elem
 import Decidable.Positive.List
-import Decidable.Positive.List
 
 public export
 data Item : type -> Type where
@@ -21,17 +20,16 @@ data Item : type -> Type where
 
 public export
 data HasKey : (p : String -> Decidable)
-           -> (t    : Decidable -> Type)
            -> (item : Item ty)
            -> Type
   where
     HK : {0 value : Singleton v}
-      -> (prfK : t (pK key))
-              -> HasKey pK t (I key value)
+      -> (prfK : Positive (pK key))
+              -> HasKey pK (I key value)
 
 0
-isVoidHK : HasKey p Positive i
-        -> HasKey p Negative i
+isVoidHK : HasKey         p  i
+        -> HasKey (Swap . p) i
         -> Void
 isVoidHK {p = p} {i = I k v} (HK po) (HK ne)
   = (p k).Cancelled po ne
@@ -41,8 +39,8 @@ HASKEY : (p    : String -> Decidable)
       -> (item : Item ty)
       -> Decidable
 HASKEY p i
-  = D (HasKey p Positive i)
-      (HasKey p Negative i)
+  = D (HasKey         p  i)
+      (HasKey (Swap . p) i)
       isVoidHK
 
 export

@@ -17,7 +17,7 @@ modules = Decidable.Positive
         , Decidable.Positive.List
 
         , Decidable.Positive.List.HasLength
-        , Decidable.Positive.List.Quantifier.Wrong
+        , Decidable.Positive.List.Quantifier.Old
         , Decidable.Positive.List.Quantifier
         , Decidable.Positive.List.Elem
         , Decidable.Positive.List.ElemAt

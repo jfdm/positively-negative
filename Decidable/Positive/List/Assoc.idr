@@ -1,31 +1,27 @@
 module Decidable.Positive.List.Assoc
 
-import        Decidable.Positive
-import        Decidable.Positive.Dependent
-import        Decidable.Positive.Equality
-
+import public Decidable.Positive
+import public Decidable.Positive.Dependent
+import public Decidable.Positive.Equality
 import public Decidable.Positive.Pair
-import public Decidable.Positive.DPair
+
 import public Decidable.Positive.List.Quantifier
 
 %default total
 
 public export
-HASKEY : (p  : key -> Decidable)
-      -> (xs : List (key,value))
-            -> Decidable
-HASKEY p
-  = ANY (ONFIRST p)
-
+BYKEY : (p  : key -> Decidable)
+     -> (xs : List (key,value))
+           -> Decidable
+BYKEY p xs
+  = ANY (ONFIRST p) xs
 
 export
-hasKey : {p  : key -> Decidable}
-      -> (f  : (k : key) -> Positive.Dec (p k))
-      -> (xs : List (key,value))
-            -> Positive.Dec (HASKEY p xs)
-hasKey f
+byKey : (f  : (k : key) -> Positive.Dec (p k))
+     -> (xs : List (key,value))
+           -> Positive.Dec (BYKEY p xs)
+byKey f
   = any (onFirst f)
-
 
 public export
 HOLDBOTH : (f : key   -> Decidable)
@@ -61,7 +57,6 @@ holdAt : DecEQ key
 holdAt f k
   = holdBoth (decEq k) f
 
-
 public export
 EXISTS : DecEQ key
       => DecEQ value
@@ -81,7 +76,6 @@ exists : DecEQ key
              -> Positive.Dec (EXISTS k v kvs)
 exists k v
   = holdBoth (decEq k) (decEq v)
-
 
 namespace Lookup
 
@@ -153,7 +147,6 @@ namespace Lookup
     lookup k ((x,v) :: xs) | (Right pY)
       = Right (Just v ** Here pY)
 
-  public export
   0
   no' : ByKey    f Positive Negative k (Just v) kvs
      -> ByKeyNot f Negative Positive k Nothing kvs
@@ -173,7 +166,8 @@ namespace Lookup
         no'
 
   public export
-  shift : {k : key} -> DecEQ key => (LOOKUP k kvs).Positive (Just v)
+  shift : {k : key}
+       ->      DecEQ key => (LOOKUP k kvs).Positive (Just v)
        -> Positive (ELEM k v kvs)
   shift (Here pK) = Here pK
   shift (There pK ltr) = There pK (shift ltr)

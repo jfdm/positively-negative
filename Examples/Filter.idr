@@ -29,8 +29,8 @@ data Filter : (holdsFor : type -> Decidable)
     MkFilter : {thrown : List type}
             -> (kept : List type)
             -> (prfOrdering : Interleaving kept thrown input)
-            -> (prfKept     : All holdsFor Positive Negative  kept)
-            -> (prfThrown   : All holdsFor Negative Positive  thrown)
+            -> (prfKept     : Positive (ALL holdsFor kept))
+            -> (prfThrown   : Positive (ALL (Swap . holdsFor) thrown))
             -> Filter holdsFor input
 
 filter : (test  : (value : type) -> Positive.Dec (holds value))

@@ -9,22 +9,19 @@ public export
 data OnSecond : (f    : Type)
              -> (s    : (value : f) -> Type)
              -> (pred : {x : f} -> s x -> Decidable)
-             -> (pos  : Decidable -> Type)
-             -> (neg  : Decidable -> Type)
              -> (pair : DPair f s)
                      -> Type
   where
     Holds : {0 pred : {x : f} -> s x -> Decidable}
          -> {x   : f}
          -> {y   : s x}
-         -> (prf : pos (pred y))
-                -> OnSecond f s pred pos neg (x ** y)
-
+         -> (prf : Positive (pred y))
+                -> OnSecond f s pred (x ** y)
 
 0
 no : {p : {x : f} -> (value : s x) -> Decidable}
-  -> OnSecond f s p Positive Negative (x ** y)
-  -> OnSecond f s p Negative Positive (x ** y)
+  -> OnSecond f s         p  (x ** y)
+  -> OnSecond f s (Swap . p) (x ** y)
   -> Void
 no (Holds prf) (Holds n) = (p y).Cancelled prf n
 
@@ -35,8 +32,8 @@ ONSECOND : (f : Type)
         -> DPair f s
         -> Decidable
 ONSECOND f p (x ** y)
-  = D (OnSecond f s p Positive Negative (x ** y))
-      (OnSecond f s p Negative Positive (x ** y))
+  = D (OnSecond f s         p  (x ** y))
+      (OnSecond f s (Swap . p) (x ** y))
       no
 
 export
