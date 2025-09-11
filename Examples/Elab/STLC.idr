@@ -83,13 +83,10 @@ namespace STLC
        -> (ast   : AST)
                -> Either (Check.Error ctxt ty)
                          (STLC  types ty)
-  check ctxt ty ast with (synth ctxt ast)
-    check ctxt ty ast | (Left err)
-      = Left (SynthError err)
-    check ctxt ty ast | (Right (syn ** tm)) with (decEq' syn ty)
-      check ctxt ty ast | (Right (syn ** tm)) | (Left err)
-        = Left (Mismatch syn err)
-      check ctxt ty ast | (Right (ty ** tm)) | (Right Refl) = Right tm
+  check ctxt ty ast
+    = do (syn ** tm) <- synth ctxt ast `otherwise` SynthError
+         Refl <- decEq' syn ty `otherwise` (Mismatch syn)
+         pure tm
 
   synth ctxt (Var str)
     = do (loc ** prf) <- isBound str ctxt `otherwise` (NotBound str)
@@ -101,27 +98,19 @@ namespace STLC
          Left err => Left (Next err)
          Right (tyRet ** tm) => pure (FUNC ty tyRet ** F tm)
 
-  synth ctxt (App f a) with (synth ctxt f)
-    synth ctxt (App f a) | (Left err) = Left err
-    synth ctxt (App f a) | (Right (NAT ** ftm))
-      = Left (FuncExpected NAT YIN)
-    synth ctxt (App f a) | (Right ((FUNC x y) ** ftm)) with (check ctxt x a)
-      synth ctxt (App f a) | (Right ((FUNC x y) ** ftm)) | (Left err)
-        = Left (CheckError x err)
-      synth ctxt (App f a) | (Right ((FUNC x y) ** ftm)) | (Right atm)
-        = Right (y ** A ftm atm)
+  synth ctxt (App f a)
+    = do (FUNC x y ** ftm) <- synth ctxt f `otherwise` id
+            | (NAT ** ftm) => Left (FuncExpected NAT YIN)
+         atm <- check ctxt x a `otherwise` (CheckError x)
+         pure (y ** A ftm atm)
 
   synth ctxt (Nat k)
     = pure (NAT ** N k)
 
-  synth ctxt (Add x y) with (check ctxt NAT x)
-    synth ctxt (Add x y) | (Left err)
-      = Left (CheckError NAT err)
-    synth ctxt (Add x y) | (Right xtm) with (check ctxt NAT y)
-      synth ctxt (Add x y) | (Right xtm) | (Left err)
-        = Left (CheckError NAT err)
-      synth ctxt (Add x y) | (Right xtm) | (Right ytm)
-        = Right (NAT ** P xtm ytm)
+  synth ctxt (Add x y)
+    = do xtm <- check ctxt NAT x `otherwise` (CheckError NAT)
+         ytm <- check ctxt NAT y `otherwise` (CheckError NAT)
+         pure (NAT ** P xtm ytm)
 
   mutual
     namespace Synth
