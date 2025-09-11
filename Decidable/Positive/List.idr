@@ -1,7 +1,12 @@
+||| SImply decidable things about lists.
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Decidable.Positive.List
 
-import Decidable.Positive
-import Decidable.Positive.Equality
+import        Decidable.Positive
+import public Decidable.Positive.Equality
 
 %default total
 
@@ -13,41 +18,46 @@ public export
 data IsCons : (xs : List a) -> Type where
   Cons : IsCons (x::xs)
 
-prf : IsEmpty xs -> IsCons xs -> Void
-prf Empty Cons impossible
-
 public export
 ISEMPTY : (xs : List a) -> Decidable
 ISEMPTY xs
   = D (IsEmpty xs)
       (IsCons  xs)
       prf
+  where
+
+  prf : forall xs . IsEmpty xs -> IsCons xs -> Void
+  prf Empty Cons impossible
 
 public export
 ISCONS : (xs : List a) -> Decidable
 ISCONS
-  = (Positive.Not . ISEMPTY)
+  = (Swap . ISEMPTY)
 
 export
-isEmpty : (xs : List a) -> Positive.Dec (ISEMPTY xs)
+isEmpty : (xs : List a) -> Dec (ISEMPTY xs)
 isEmpty []
   = Right Empty
 isEmpty (x :: xs)
   = Left Cons
 
 export
-isCons : (xs : List a) -> Positive.Dec (ISCONS xs)
+isCons : (xs : List a) -> Dec (ISCONS xs)
 isCons xs = mirror (isEmpty xs)
 
 namespace Equality
 
   public export
-  data AreEqual : (p : a -> a -> Decidable) -> List a -> List a -> Type where
-    Here : AreEqual p Nil Nil
-    There : {0 p : a -> a -> Decidable}
-         -> (p x y).Positive
-         -> AreEqual p xs ys
-         -> AreEqual p (x::xs) (y::ys)
+  data AreEqual : (p : a -> a -> Decidable) 
+                    -> List a 
+                    -> List a 
+                    -> Type 
+    where
+      Here : AreEqual p Nil Nil
+      There : {0 p : a -> a -> Decidable}
+           -> (p x y).Positive
+           -> AreEqual p xs ys
+           -> AreEqual p (x::xs) (y::ys)
 
   public export
   data AreEqualNot : (p : a -> a -> Decidable) -> List a -> List a -> Type where
@@ -64,7 +74,9 @@ namespace Equality
             -> AreEqualNot p (x::xs) (y::ys)
 
   0
-  prf : DecEQ a => {xs,ys : List a} -> AreEqual EQUAL xs ys -> AreEqualNot EQUAL xs ys -> Void
+  prf : DecEQ a => {xs,ys : List a}
+     -> AreEqual EQUAL xs ys
+     -> AreEqualNot EQUAL xs ys -> Void
   prf Here LeftHeavy impossible
   prf Here RightHeavy impossible
   prf Here (RestNot x y) impossible
@@ -73,7 +85,7 @@ namespace Equality
   prf {xs = (x :: xs)} {ys = (y :: ys)} (There pos z) (RestNot w v)
     = prf z v
   prf {xs = (x :: xs)} {ys = (y :: ys)} (There pos z) (HeadNot w)
-    = (EQUAL x y).Cancelled pos w
+    = (EQUAL x y).Cancels pos w
 
   asRefl : DecEQ a => {xs, ys : List a} -> AreEqual EQUAL xs ys -> Equal xs ys
   asRefl Here = Refl
@@ -91,11 +103,6 @@ namespace Equality
 
   asVoid {xs = (x :: xs)} {ys = (x :: xs)} (HeadNot hnot) Refl with (toVoid hnot)
     asVoid {xs = (x :: xs)} {ys = (x :: xs)} (HeadNot hnot) Refl | boom = boom Refl
-
-  self : DecEQ a => (xs : List a) -> AreEqual EQUAL xs xs
-  self [] = Here
-  self (x :: xs) = refl x `There` (self xs)
-
 
   public export
   DecEQ a => DecEQ (List a) where
@@ -118,12 +125,11 @@ namespace Equality
       = Left LeftHeavy
 
     decEq (x :: xs) (y :: ys)
-       =  either  (Left . HeadNot)
-                  (\h => either (Left . RestNot h)
-                                (Right . There h)
-                                (decEq xs ys))
-                  (decEq x y)
+       = do pH <- (decEq x y) `otherwise` HeadNot
+            pT <- (decEq xs ys) `otherwise` (RestNot pH)
+            pure (There pH pT)
 
-    refl = List.Equality.self
+    refl [] = Here
+    refl (x :: xs) = refl x `There` (refl xs)
 
 -- [ EOF ]

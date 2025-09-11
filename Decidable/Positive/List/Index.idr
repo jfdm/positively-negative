@@ -1,3 +1,8 @@
+||| Decidable decisions about list indices.
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Decidable.Positive.List.Index
 
 import Decidable.Positive

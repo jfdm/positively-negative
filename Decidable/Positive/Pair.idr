@@ -1,26 +1,32 @@
+||| Decidable things for Pairs
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Decidable.Positive.Pair
 
 import public Decidable.Positive
 
 %default total
 
+||| Reasoning about the first element.
 namespace First
+
   public export
   data OnFirst : (pred : f -> Decidable)
               -> (pair : (f,s))
                       -> Type
     where
-      H :  {0 kv : (type_f,type_s)}
-        -> {0 p : type_f -> Decidable}
-        -> (prf : Positive (p $ fst kv))
-              -> OnFirst p kv
+      H : {0 p : type_f -> Decidable}
+       -> (prf : Positive (p x))
+              -> OnFirst p (x,y)
 
   0
   no : OnFirst         p  x
     -> OnFirst (Swap . p) x
     -> Void
   no {x=(f,s)} (H pY) (H pN)
-    = (p f).Cancelled pY pN
+    = (p f).Cancels pY pN
 
   public export
   ONFIRST : (p : f -> Decidable) -> (x : (f,s)) -> Decidable
@@ -28,16 +34,17 @@ namespace First
     = D (OnFirst         p  x)
         (OnFirst (Swap . p) x)
         no
+    where
 
   export
   onFirst : {0 p : type -> Decidable}
          -> (f  : (x : type) -> Positive.Dec (p x))
          -> (kv : (type,b))
               -> Positive.Dec (ONFIRST p kv)
-  onFirst f kv
-    = either (\r => Left (H r))
-             (\r => Right (H r))
-             (f (fst kv))
+  onFirst f (x,y)
+    = either (Left  . H)
+             (Right . H)
+             (f x)
 
   public export
   ONFIRSTNOT : (p : f -> Decidable) -> (x : (f,s)) -> Decidable
@@ -66,7 +73,7 @@ namespace Second
     -> OnSecond (Swap . p) x
     -> Void
   no (H pY) (H pN)
-    = (p (snd x)).Cancelled pY pN
+    = (p (snd x)).Cancels pY pN
 
   public export
   ONSECOND : (p : s -> Decidable) -> (x : (f,s)) -> Decidable
@@ -137,13 +144,13 @@ namespace Both
     -> BothNot (Swap . f) (Swap . s) p
     -> Void
   no (B pFY pSY) (FNot pFN)
-    = (f $ fst p).Cancelled pFY pFN
+    = (f $ fst p).Cancels pFY pFN
 
   no (B pFY pSY) (SNot pSN)
-    = (s $ snd p).Cancelled pSY pSN
+    = (s $ snd p).Cancels pSY pSN
 
   no (B pFY pSY) (BNot pFN pSN)
-    = (f $ fst p).Cancelled pFY pFN
+    = (f $ fst p).Cancels pFY pFN
 
   public export
   BOTH : (f : typeF -> Decidable)

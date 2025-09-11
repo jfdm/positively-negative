@@ -1,3 +1,8 @@
+||| Decidable things for All List quantifiers.
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Decidable.Positive.All.Any
 
 import public Data.List.Quantifiers
@@ -10,6 +15,7 @@ data Any : (item  : type -> Type)
                  -> Type
   where
     Here : {0 p : {i : type} -> (x : item i) -> Decidable}
+        -> {x : _}
         -> (  prf : Positive (p x))
                  -> Any item p (x::xs)
 
@@ -38,7 +44,7 @@ isVoid : {p : {i : type} -> (x : item i) -> Decidable}
       -> All item (Swap . p) xs
       -> Void
 isVoid {p = p} {xs = (x :: xs)} (Here pP) (Extend pF tail)
-    = (p x).Cancelled pP pF
+    = (p x).Cancels pP pF
 
 isVoid {p = p} {xs = (x :: xs)} (There prf tail) (Extend y z)
   = isVoid tail z
@@ -69,10 +75,10 @@ any : {0 is : List type}
          -> Positive.Dec (ANY item p xs)
 any f []
   = Left Empty
-any f (x :: y)
-  = either (\nH => either (Left  . Extend nH)
+any f (x :: xs)
+  =  either (\nH => either (Left  . Extend nH)
                           (Right . There nH)
-                          (any f y))
+                          (any f xs))
            (Right . Here)
            (f x)
 

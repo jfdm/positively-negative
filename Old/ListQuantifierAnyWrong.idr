@@ -1,4 +1,4 @@
-module Decidable.Positive.List.Quantifier.Any.Wrong
+module Old.ListQuantifierAnyWrong
 
 import public Decidable.Positive
 import public Decidable.Positive.List.Quantifier

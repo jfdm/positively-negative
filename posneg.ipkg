@@ -1,31 +1,30 @@
 package posneg
 
 modules = Decidable.Positive
+        , Decidable.Positive.Dependent
         , Decidable.Positive.Equality
-        , Decidable.Positive.Equality.Propositional
-        , Decidable.Positive.Builtin
 
+        , Decidable.Positive.Builtin
         , Decidable.Positive.So
-        , Decidable.Positive.Nat
         , Decidable.Positive.String
 
+        , Decidable.Positive.Nat
         , Decidable.Positive.Pair
-
-        , Decidable.Positive.All.Any
-        , Decidable.Positive.All.AnyAt
 
         , Decidable.Positive.List
 
         , Decidable.Positive.List.HasLength
-        , Decidable.Positive.List.Quantifier.Old
         , Decidable.Positive.List.Quantifier
+        , Decidable.Positive.List.HoldsAt
         , Decidable.Positive.List.Elem
-        , Decidable.Positive.List.ElemAt
         , Decidable.Positive.List.Index
         , Decidable.Positive.List.Relation.All
         , Decidable.Positive.List.Assoc
 
-        , Examples
+        , Decidable.Positive.All.Any
+        , Decidable.Positive.All.AnyAt
+
+        , Examples.Nat
         , Examples.Filter
         , Examples.Context.Item
         , Examples.Context
@@ -36,5 +35,4 @@ modules = Decidable.Positive
         , Examples.SessionTypes.Binary.ChoiceNo
 
         , Examples.Tree
-
 -- [ EOF ]

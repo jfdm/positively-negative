@@ -1,3 +1,8 @@
+||| Decidable list length.
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Decidable.Positive.List.HasLength
 
 import        Decidable.Positive
@@ -17,16 +22,6 @@ namespace List
           -> HasLengthNot (S n) (x::xs)
 
 
-prfHasLengthVoid : HasLength    n xs
-                -> HasLengthNot n xs
-                -> Void
-prfHasLengthVoid Z MoreElems impossible
-prfHasLengthVoid Z MoreSize impossible
-prfHasLengthVoid Z (Step x) impossible
-
-prfHasLengthVoid (S x) (Step y)
-  = prfHasLengthVoid x y
-
 public export
 HASLENGTH : (n  : Nat)
          -> (xs : List a)
@@ -35,6 +30,18 @@ HASLENGTH n xs
   = D (HasLength    n xs)
       (HasLengthNot n xs)
       (prfHasLengthVoid)
+
+  where
+  prfHasLengthVoid : forall n, xs
+                   . HasLength    n xs
+                  -> HasLengthNot n xs
+                  -> Void
+  prfHasLengthVoid Z MoreElems impossible
+  prfHasLengthVoid Z MoreSize impossible
+  prfHasLengthVoid Z (Step x) impossible
+
+  prfHasLengthVoid (S x) (Step y)
+    = prfHasLengthVoid x y
 
 export
 hasLength : (n  : Nat)
@@ -56,9 +63,7 @@ HASLENGTHNOT : (n  : Nat)
             -> (xs : List a)
                   -> Decidable
 HASLENGTHNOT n xs
-  = D (HasLengthNot n xs)
-      (HasLength    n xs)
-      (\x,y => prfHasLengthVoid y x)
+  = (Swap $ HASLENGTH n xs)
 
 export
 hasLengthNot : (n  : Nat)
@@ -66,6 +71,5 @@ hasLengthNot : (n  : Nat)
                   -> Positive.Dec (HASLENGTHNOT n xs)
 hasLengthNot n xs
   = mirror (hasLength n xs)
-
 
   -- [ EOF ]

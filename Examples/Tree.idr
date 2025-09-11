@@ -1,9 +1,8 @@
 module Examples.Tree
 
-
 import public Decidable.Positive
 import public Decidable.Positive.Equality
-import Decidable.Positive.Nat
+import        Decidable.Positive.Nat
 
 %default total
 
@@ -11,56 +10,52 @@ data Tree a = Leaf | Node a (Tree a) (Tree a)
 
 public export
 data All : (pred : (value : type) -> Decidable)
-        -> (pos  : Decidable -> Type)
-        -> (neg  : Decidable -> Type)
         -> (tree : Tree a)
                 -> Type
   where
-    Empty : All p pos neg Leaf
+    Empty : All p Leaf
     Branch : {0 p : type -> Decidable}
-          -> (prf : pos (p x))
-          -> (prfL : All p pos neg left)
-          -> (prfR : All p pos neg right)
-                  -> All p pos neg (Node x left right)
+          -> (prf : Positive (p x))
+          -> (prfL : All p left)
+          -> (prfR : All p right)
+                  -> All p (Node x left right)
 
 data Any : (pred : (value : type) -> Decidable)
-        -> (pos  : Decidable -> Type)
-        -> (neg  : Decidable -> Type)
         -> (tree : Tree a)
                 -> Type
   where
     Here : {0 p : type -> Decidable}
-        -> (prf : pos (p x))
-               -> Any p pos neg (Node x left right)
+        -> (prf : Positive (p x))
+               -> Any p (Node x left right)
 
     ThereL : {0 p : type -> Decidable}
-          -> (prf : neg (p x))
-          -> (ltr : Any p pos neg left)
-                 -> Any p pos neg (Node x left right)
+          -> (prf : Negative (p x))
+          -> (ltr : Any p left)
+                 -> Any p (Node x left right)
 
     ThereR : {0 p : type -> Decidable}
-          -> (prf : neg (p x))
-          -> (ltr : Any p pos neg right)
-                 -> Any p pos neg (Node x left right)
+          -> (prf : Negative (p x))
+          -> (ltr : Any p right)
+                 -> Any p (Node x left right)
 
 
 public export
 ALL : (p : type -> Decidable) -> (t : Tree type) -> Decidable
-ALL p t = D (All p Positive Negative t)
-            (Any p Negative Positive t)
+ALL p t = D (All         p  t)
+            (Any (Swap . p) t)
             prf
   where
     0
     prf : {p : type -> Decidable}
-       -> {t : Tree type} -> All p Positive Negative t
-                          -> Any p Negative Positive t
+       -> {t : Tree type} -> All         p  t
+                          -> Any (Swap . p) t
                           -> Void
     prf Empty (Here x) impossible
     prf Empty (ThereL x ltr) impossible
     prf Empty (ThereR x ltr) impossible
     prf {p} {t=Node v l r} (Branch x prfL prfR) ant with (ant)
       prf {p} {t=Node v l r} (Branch x prfL prfR) ant | (Here prfA)
-          = (p v).Cancelled x prfA
+          = (p v).Cancels x prfA
       prf {p} {t=Node v l r} (Branch x prfL prfR) ant | (ThereL prfA ltr)
         = prf prfL ltr
       prf {p} {t=Node v l r} (Branch x prfL prfR) ant | (ThereR prfA ltr)
@@ -72,55 +67,23 @@ all : (f : (x : a) -> Positive.Dec (p x))
         -> Positive.Dec (ALL p t)
 all f Leaf
   = Right Empty
-all f (Node v l r) with ((f v))
-  all f (Node v l r) | (Left x) = Left (Here x)
-  all f (Node v l r) | (Right x) with (Tree.all f l)
-    all f (Node v l r) | (Right x) | (Left y)
-      = Left (ThereL x y)
-    all f (Node v l r) | (Right x) | (Right prfL) with (Tree.all f r)
-      all f (Node v l r) | (Right x) | (Right prfL) | (Left y)
-        = Left (ThereR x y)
-      all f (Node v l r) | (Right x) | (Right prfL) | (Right prfR)
-        = Right (Branch x prfL prfR)
+
+all f (Node v l r)
+  = do pH <- (f v) `otherwise` Here
+       pL <- (all f l) `otherwise` (ThereL pH)
+       pR <- (all f r) `otherwise`  (ThereR pH)
+       pure (Branch pH pL pR)
 
 public export
 ANY : (p : type -> Decidable) -> (t : Tree type) -> Decidable
-ANY p t = D (Any p Positive Negative t)
-            (All p Negative Positive t)
-            prf
-
-  where
-    0
-    prf : {p : type -> Decidable}
-       -> {t : Tree type} -> Any p Positive Negative t
-                          -> All p Negative Positive t
-                         -> Void
-    prf {p = p} {t = (Node v left right)} (Here x) (Branch y prfL prfR)
-        = (p v).Cancelled x y
-    prf {p = p} {t = (Node v left right)} (ThereL x ltr) (Branch y prfL prfR)
-      = prf ltr prfL
-    prf {p = p} {t = (Node v left right)} (ThereR x ltr) (Branch y prfL prfR)
-      = prf ltr prfR
-
-
+ANY p t = Swap (ALL (Swap . p) t)
 
 export
 any : (f : (x : a) -> Positive.Dec (p x))
    -> (t : Tree a)
         -> Positive.Dec (ANY p t)
-any f Leaf
-  = Left Empty
-any f (Node v l r) with (f v)
-  any f (Node v l r) | (Left noH) with (Tree.any f l)
-    any f (Node v l r) | (Left noH) | (Left noL) with (Tree.any f r)
-      any f (Node v l r) | (Left noH) | (Left noL) | (Left noR)
-        = Left (Branch noH noL noR)
-      any f (Node v l r) | (Left noH) | (Left noL) | (Right x)
-        = Right (ThereR noH x)
-    any f (Node v l r) | (Left noH) | (Right x)
-      = Right (ThereL noH x)
-  any f (Node v l r) | (Right x)
-    = Right (Here x)
+any f t = mirror (all (\t => mirror $ f t) t)
+
 
 data Shape : (l,r : Tree a) -> Type where
   BothEmpty : Shape Leaf Leaf
@@ -176,7 +139,7 @@ prfCan CmpH (CmpNoHead prf z) impossible
 prfCan (CmpT prf prfL prfR) (CmpNoLeft rest) = prfCan prfL rest
 prfCan (CmpT prf prfL prfR) (CmpNoRight rest) = prfCan prfR rest
 prfCan {x=Node x xl xr} {y=Node y yl yr} (CmpT prf prfL prfR) (CmpNoHead no)
-  = (EQUAL x y).Cancelled prf no
+  = (EQUAL x y).Cancels prf no
 
 asREFL : DecEQ a => {x,y : Tree a} -> TreeCmp2 EQUAL x y -> Equal x y
 asREFL CmpH = Refl

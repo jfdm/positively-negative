@@ -1,4 +1,4 @@
-module Decidable.Positive.List.Quantifier.Old
+module Old.ListQuantifier
 
 import public Decidable.Positive
 
@@ -69,7 +69,7 @@ namespace List
 
     prf {p} {xs=(x::xs)} (Extend pos rest) any with (any)
       prf {p = p} {xs=(x::xs)} (Extend pos rest) any | (Here neg)
-        = (p x).Cancelled pos neg
+        = (p x).Cancels pos neg
       prf {p = p} {xs=(x::xs)} (Extend pos rest) any | (There pos' later)
         = All.prf rest later
 
@@ -112,7 +112,7 @@ namespace List
        -> All p Negative Positive xs
        -> Void
     prf {p} {xs=x::xs} (Here neg) (Extend pos rest)
-      = (p x).Cancelled neg pos
+      = (p x).Cancels neg pos
 
     prf {p} {xs=x::xs} (There pos rest) (Extend neg later)
       = prf rest later

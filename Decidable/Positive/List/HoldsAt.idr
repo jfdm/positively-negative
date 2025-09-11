@@ -1,4 +1,9 @@
-module Decidable.Positive.List.ElemAt
+||| Does the predicate hold at a specified index.
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
+module Decidable.Positive.List.HoldsAt
 
 import Decidable.Positive
 
@@ -32,13 +37,12 @@ namespace List
       T : HoldsAtNot p     xs     n
        -> HoldsAtNot p (x::xs) (S n)
 
-  public export
   0
   isVoid : HoldsAt            p  xs n
         -> HoldsAtNot (Swap . p) xs n
         -> Void
   isVoid {xs = x :: xs} (Here pH) (H pN)
-    = (p x).Cancelled pH pN
+    = (p x).Cancels pH pN
 
   isVoid (There ltrY) (T ltrN)
     = isVoid ltrY ltrN

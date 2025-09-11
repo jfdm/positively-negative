@@ -1,3 +1,8 @@
+||| Decidable quantifiers for lists.
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Decidable.Positive.List.Quantifier
 
 import public Decidable.Positive
@@ -40,8 +45,10 @@ prf : {xs : List type}
    -> Void
 prf Empty (Here x) impossible
 prf Empty (There x rest) impossible
-prf (Extend pos rest) (Here neg) = (p _).Cancelled pos neg
-prf (Extend pos rest) (There neg ltr) = prf rest ltr
+prf (Extend pos rest) (Here neg)
+  = (p _).Cancels pos neg
+prf (Extend pos rest) (There neg ltr)
+  = prf rest ltr
 
 public export
 ALL : (p  : type -> Decidable)
@@ -56,11 +63,10 @@ all : (f  : (x : type) -> Positive.Dec (p x))
      -> (xs : List type)
            -> Positive.Dec (ALL p xs)
 all f [] = Right Empty
-all f (x :: xs) with (f x)
-  all f (x :: xs) | (Left y) = Left (Here y)
-  all f (x :: xs) | (Right y) with (all f xs)
-    all f (x :: xs) | (Right y) | (Left z) = Left (There y z)
-    all f (x :: xs) | (Right y) | (Right z) = Right (Extend y z)
+all f (x :: xs)
+  = do pH <- (f x) `otherwise` Here
+       pT <- (all f xs) `otherwise` (There pH)
+       pure (Extend pH pT)
 
 0
 prf' : {xs : List type}
@@ -68,7 +74,7 @@ prf' : {xs : List type}
    -> All (Swap . p) xs
    -> Void
 prf' {xs = (x::xs)} (Here y) (Extend n _)
-  = (p x).Cancelled y n
+  = (p x).Cancels y n
 
 prf' (There _ ly) (Extend _ ln)
   = prf' ly ln
@@ -78,27 +84,35 @@ ANY : (p  : type -> Decidable)
    -> (xs : List type)
          -> Decidable
 ANY p xs
---  = Swap (ALL (Swap . p) xs)
   = D (Any         p  xs)
       (All (Swap . p) xs)
       (prf')
+
+-- [ NOTE ]
+--
+-- The nicer version has been removed as idris' elaborator
+-- cannot go deep enough and resolve the swaps..
+
+--  = Swap (ALL (Swap . p) xs)
 
 export
 any : {0 p : type -> Decidable}
    -> (f  : (x : type) -> Positive.Dec (p x))
    -> (xs : List type)
          -> Positive.Dec (ANY p xs)
---any f xs = mirror (all (\x => mirror $ f x) xs)
 any f []
   = Left Empty
-any f (x :: xs) with (f x)
-  any f (x :: xs) | (Left nh) with (any f xs)
-    any f (x :: xs) | (Left nh) | (Left nl)
-      = Left (Extend nh nl)
-    any f (x :: xs) | (Left nh) | (Right y)
-      = Right (There nh y)
-  any f (x :: xs) | (Right yn)
-    = Right (Here yn)
+any f (x :: xs)
+  = mirror
+  $ do nH <- (f x) `wiseother` Here
+       nT <- (Quantifier.any f xs) `wiseother` (There nH)
+       pure (Extend nH nT)
+
+-- [ NOTE ]
+--
+-- ibid
+
+--any f xs = mirror (all (\x => mirror $ f x) xs)
 
 
 export
@@ -121,5 +135,22 @@ showAny f g (Here prf)
 showAny f g (There prf rest)
   = "(\{g prf} :: \{showAny f g rest})"
 
+export
+showALL : (f : {x:_} -> Positive (p x) -> String)
+       -> (g : {x:_} -> Negative (p x) -> String)
+       -> Positive.Dec (ALL p xs)
+       -> String
+showALL f g (Left x)
+  = "(No (Any) \{showAny g f x})"
+showALL f g (Right x)
+  = "(Yes (All) \{showAll f x})"
+
+export
+showANY : (f : {x : _} -> Positive (p x) -> String)
+       -> (g : {x : _} -> Negative (p x) -> String)
+       -> Positive.Dec (ANY p xs)
+       -> String
+showANY f g (Left x) = "(No (All) \{showAll g x})"
+showANY f g (Right x) = "(Yes (Any) \{showAny f g x})"
 
 -- [ EOF ]

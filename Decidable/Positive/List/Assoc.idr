@@ -1,6 +1,11 @@
+||| Decidable decisions on Association lists.
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Decidable.Positive.List.Assoc
 
-import public Decidable.Positive
+import        Decidable.Positive
 import public Decidable.Positive.Dependent
 import public Decidable.Positive.Equality
 import public Decidable.Positive.Pair
@@ -81,45 +86,43 @@ namespace Lookup
 
   public export
   data ByKey : (f : (x,y : key) -> Decidable)
-            -> (pos : Decidable -> Type)
-            -> (neg : Decidable -> Type)
             -> (k   : key)
             -> (v   : Maybe value)
             -> (kvs : List (Pair key value))
                    -> Type
 
     where
-      Here : {0 f : (x,y : key) -> Decidable}
-          -> (pK : pos (f x a))
-                -> ByKey f pos neg x (Just b) ((a,b) :: kvs)
+      Here : {0 f  : (x,y : key) -> Decidable}
+          -> (  pK : Positive (f x a))
+                 -> ByKey f x (Just b) ((a,b) :: kvs)
 
-      There : {0 f : (x,y : key) -> Decidable}
-           -> (pK  : neg (f x a))
-            -> (ltr : ByKey f pos neg x y kvs)
-                   -> ByKey f pos neg x y ((a,b) :: kvs)
+      There : {0 f   : (x,y : key) -> Decidable}
+           -> (  pK  : Negative (f x a))
+           -> (  ltr : ByKey f x y kvs)
+                    -> ByKey f x y ((a,b) :: kvs)
 
   public export
   data ByKeyNot : (f : (x,y : key) -> Decidable)
-               -> (pos : Decidable -> Type)
-               -> (neg : Decidable -> Type)
                -> (k   : key)
                -> (v   : Maybe value)
                -> (kvs : List (Pair key value))
                       -> Type
     where
-      Empty : ByKeyNot f pos neg x Nothing Nil
+      Empty : ByKeyNot f x Nothing Nil
       Extend : {0 f   : (x,y : key) -> Decidable}
-            -> (  pK  : pos (f x a))
-            -> (  ltr : ByKeyNot f pos neg x y kvs)
-                     -> ByKeyNot f pos neg x y ((a,b) :: kvs)
+            -> (  pK  : Negative (f x a))
+            -> (  ltr : ByKeyNot f x y kvs)
+                     -> ByKeyNot f x y ((a,b) :: kvs)
 
   0
   no : (v : Maybe value)
-    -> ByKey    f Positive Negative k v kvs
-    -> ByKeyNot f Negative Positive k v kvs
+    -> ByKey    f  k v kvs
+    -> ByKeyNot f k v kvs
     -> Void
-  no (Just b) (Here pK) (Extend x ltr) = (f k _).Cancelled pK x
-  no v (There pK ltr) (Extend x y) = no v ltr y
+  no (Just b) (Here pK) (Extend x ltr)
+    = (f k _).Cancels pK x
+  no v (There pK ltr) (Extend x y)
+    = no v ltr y
 
   public export
   LOOKUP : {value : Type}
@@ -128,8 +131,8 @@ namespace Lookup
         -> (kvs : List (Pair key value))
                -> DDecidable
   LOOKUP k kvs
-    = D _ (\v => ByKey    EQUAL Positive Negative k v kvs)
-          (\v => ByKeyNot EQUAL Negative Positive k v kvs)
+    = D _ (\v => ByKey    EQUAL k v kvs)
+          (\v => ByKeyNot EQUAL k v kvs)
           no
 
   export
@@ -148,10 +151,10 @@ namespace Lookup
       = Right (Just v ** Here pY)
 
   0
-  no' : ByKey    f Positive Negative k (Just v) kvs
-     -> ByKeyNot f Negative Positive k Nothing kvs
+  no' : ByKey    f k (Just v) kvs
+     -> ByKeyNot f k Nothing kvs
      -> Void
-  no' (Here pK) (Extend x ltr) = (f k _).Cancelled pK x
+  no' (Here pK) (Extend x ltr) = (f k _).Cancels pK x
   no' (There pK ltr) (Extend x y) = no' ltr y
 
   public export
@@ -161,8 +164,8 @@ namespace Lookup
       -> (kvs : List (Pair key value))
              -> Decidable
   ELEM k v kvs
-    = D (ByKey    EQUAL Positive Negative k (Just v) kvs)
-        (ByKeyNot EQUAL Negative Positive k Nothing kvs)
+    = D (ByKey    EQUAL k (Just v) kvs)
+        (ByKeyNot EQUAL k Nothing kvs)
         no'
 
   public export

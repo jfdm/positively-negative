@@ -1,3 +1,11 @@
+||| Decidable equality for builtins.
+|||
+||| The decisions here are not informative and mirrors how
+||| it is down in Idris for such things.
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Decidable.Positive.Builtin
 
 import public Data.So
@@ -9,98 +17,77 @@ import        Decidable.Positive.Equality
 
 %default total
 
+||| Making decisions about unary operators
 namespace Unary
-  public export
-  data PrimUnOp : (pol  : Decidable -> Type)
-               -> (type : Type)
-               -> (op   : type -> Bool)
-               -> (p    : type)
-                       -> Type
-    where
-      R : (prf : pol (SO (op p)))
-                 -> PrimUnOp pol t op p
 
-  public export
-  PRIMUNOP : {type : Type}
-          -> (op : type -> Bool)
-          -> (s  : type)
-                -> Decidable
-  PRIMUNOP op s
-      = D (PrimUnOp Positive type op s)
-          (PrimUnOp Negative type op s)
-          isVoid
-    where
-      0
-      isVoid : PrimUnOp Positive type op p
-            -> PrimUnOp Negative type op p
-            -> Void
-      isVoid (R prf) (R x)
-        = (Cancelled (SO $ op p)) prf x
-
+  ||| Uninformative, yet decidable, decision for whether
+  ||| the given unary boolean operation `op` hold for `s`.
+  |||
+  ||| @op the unary operation being performed on values,
+  |||     we expect positive decisions to be true and
+  |||     negative ones to true.
+  ||| @s  the value being reasoned about.
+  |||
   export
   primUnOp : (op : type -> Bool)
           -> (s  : type)
-                -> Dec (PRIMUNOP op s)
+                -> Dec (SO (op s))
   primUnOp op s
-    = either (Left . R)
-             (Right . R)
-             (isTrue (op s))
+    = isTrue (op s)
 
 namespace Binary
+  ||| Encapslates both positive and negative decisions about
+  ||| boolean binary operators.
+  |||
+  ||| @pol is the expected polarity of the outcome.
+  |||      We require this to reduce the number of
+  |||      datatypes we require.
+  |||
+  ||| @type the type of builtins, we require this later
+  |||       when hooking into predefined interfaces
   public export
-  data PrimBinOp : (Decidable -> Type)
-                -> (a : Type)
-                -> (f : (x,y : a) -> Bool)
-                -> (x,y : a)
+  data PrimBinOp : (pol  : Decidable -> Type)
+                -> (type : Type)
+                -> (op   : (x,y : type) -> Bool)
+                -> (x,y  : type)
                        -> Type
     where
-      BinOpRes : (prf : t (SO (op x y))) -> PrimBinOp t a op x y
+      BinOpRes : (prf : pol (SO (op x y))) -> PrimBinOp pol type op x y
 
-
-  public export
-  PRIMBINOP : {type : Type}
-           -> (op   : (x,y : type) -> Bool)
-           -> (x,y  : type)
-                   -> Decidable
-  PRIMBINOP op x y
-      = D (PrimBinOp Positive type op x y)
-          (PrimBinOp Negative type op x y)
-          isVoid
-    where
-      0
-      isVoid : PrimBinOp Positive type op x y
-            -> PrimBinOp Negative type op x y
-            -> Void
-      isVoid (BinOpRes prfP) (BinOpRes prfN)
-        = (SO $ op x y).Cancelled prfP prfN
-
+  ||| Uninformative, yet decidable, decision for whether
+  ||| the given unary boolean operation `op` hold for `s`.
+  |||
+  ||| @op the binary operation being performed on values,
+  |||     we expect positive decisions to be true and
+  |||     negative ones to true.
+  ||| @p  the value being reasoned about.
+  |||
   export
   primBinOp : (op  : (x,y : type) -> Bool)
            -> (x,y : type)
-                  -> Dec (PRIMBINOP op x y)
+                  -> Dec (SO (op x y))
   primBinOp op x y
-    = either (Left . BinOpRes)
-             (Right . BinOpRes)
-             (isTrue (op x y))
+    = isTrue (op x y)
 
-
-
+||| For builtins, we do not have access to their internal
+||| implementations. We use `believe_me` because we don't them to
+||| reduce and we need these things to type check.
 namespace Equality
   public export
   [Builtin] {a : Type} -> Eq a => DecEQ a where
-    EQUAL = PRIMBINOP (==)
+    EQUAL x y =  SO ((==) x y)
 
-    toRefl (BinOpRes prf) = believe_me (Refl {x})
+    toRefl _
+      = believe_me (Refl {x})
 
-    toVoid (BinOpRes prf) Refl
+    toVoid _ Refl
       = believe_me {b = Void} ()
 
-    decEq = primBinOp (==)
+    decEq x y
+      = isTrueBlock $ (==) x y
 
     refl this
-      = BinOpRes {t=Positive} {x=this} {y=this}
-                 (believe_me $ Data.So.Oh)
-
+      = believe_me $ Data.So.Oh
 
   --------------------------------------------------------------------------------
   -- Int

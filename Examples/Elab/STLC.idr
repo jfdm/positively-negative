@@ -1,18 +1,9 @@
+||| Using decisions for the SLTC
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Examples.Elab.STLC
-
-import Data.Either
-import Data.Singleton
-
-import Decidable.Positive
-import Decidable.Positive.Equality
-import Decidable.Positive.String
-import Decidable.Positive.Nat
-import Decidable.Positive.Pair
-import Decidable.Positive.List.Assoc
-import Decidable.Positive.List.Elem
-import Decidable.Positive.List.ElemAt
-import Decidable.Positive.List.Quantifier
-import Decidable.Positive.List.Quantifier
 
 import Examples.Context
 import Examples.Elab.STLC.Types
@@ -31,7 +22,8 @@ namespace STLC
   public export
   data STLC : List Ty -> Ty -> Type
     where
-      V : AtIndex s xs n
+      V : (n : Nat)
+       -> (0 prf : AtIndex s xs n)
        -> STLC xs s
       F : STLC (x::xs) y
        -> STLC     xs  (FUNC x y)
@@ -60,7 +52,7 @@ namespace STLC
         where
           NotBound : {ctxt : Context Ty types}
                   -> (str : String)
-                  -> (prf : Negative (ISBOUND str ctxt))
+                  -> (prf : (NEGATIVE (ISBOUNDAT str ctxt)))
                          -> Error ctxt
           Next : Error (x :: xs) -> Error xs
           FuncExpected : (ty : Ty) -> Negative (ISFUNC ty) -> Error ctxt
@@ -78,16 +70,18 @@ namespace STLC
                          -> Error ctxt ty
 
   export
-  synth : (ctxt : Context Ty types)
+  synth : {types : List Ty}
+       -> (ctxt : Context Ty types)
        -> (ast  : AST)
                 -> Either (Synth.Error ctxt)
                           (DPair Ty (STLC  types))
 
   export
-  check : (ctxt : Context Ty types)
-       -> (ty   : Ty)
-       -> (ast  : AST)
-               -> Either (Check.Error ctxt  ty)
+  check : {types : List Ty}
+       -> (ctxt  : Context Ty types)
+       -> (ty    : Ty)
+       -> (ast   : AST)
+               -> Either (Check.Error ctxt ty)
                          (STLC  types ty)
   check ctxt ty ast with (synth ctxt ast)
     check ctxt ty ast | (Left err)
@@ -98,14 +92,9 @@ namespace STLC
       check ctxt ty ast | (Right (ty ** tm)) | (Right Refl) = Right tm
 
   synth ctxt (Var str)
-    = case isBound str ctxt of
-        (Left x) => Left (NotBound str x)
-        (Right prf) =>
-          case loc prf of
-            (natLoc ** prf) =>
-              case deBruijn prf of
-                (ty ** loc)
-                  => Right (ty ** V loc)
+    = do (loc ** prf) <- isBound str ctxt `otherwise` (NotBound str)
+         let (ty ** idx) = toIndex prf
+         pure (ty ** V loc idx)
 
   synth ctxt (Func str ty expr)
     = case synth (I str (Val ty) :: ctxt) expr of

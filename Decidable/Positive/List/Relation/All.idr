@@ -1,3 +1,8 @@
+||| Relations on Lists.
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Decidable.Positive.List.Relation.All
 
 import        Decidable.Positive
@@ -42,7 +47,7 @@ namespace Relation
   prf Empty (There head tail) impossible
 
   prf {xs = (x::xs)} (Cons hy _) (Here hn)
-    = (ALL (p x) xs).Cancelled hy hn
+    = (ALL (p x) xs).Cancels hy hn
   prf (Cons _ ty)  (There _ tn)
     = prf ty tn
 
@@ -64,16 +69,14 @@ namespace Relation
 
   export
   all : (f  : (x,y : type) -> Positive.Dec (p x y))
-          -> (xs : List type)
-                -> Positive.Dec (Relation.ALL p xs)
+     -> (xs : List type)
+           -> Positive.Dec (Relation.ALL p xs)
   all f []
     = Right Empty
   all f (x :: xs)
-    = either (Left . Here)
-             (\prfH => either (Left  . There prfH)
-                              (Right . Cons prfH)
-                              (Relation.all f xs))
-             (all (f x) xs)
+    = do prfH <- all (f x) xs `otherwise` Here
+         prfT <- all f xs `otherwise` (There prfH)
+         pure (Cons prfH prfT)
 
   export
   any : (f  : (x,y : type) -> Positive.Dec (p x y))

@@ -86,13 +86,13 @@ cancelled DF (DSRLtr prf ltr) impossible
 cancelled DF (DRSLtr prf ltr) impossible
 
 cancelled (DS prf ltr) (DSRL x)
-  = (EQUAL _ _).Cancelled prf x
+  = (EQUAL _ _).Cancels prf x
 
 cancelled (DS prf ltr) (DSRLtr x y)
   = cancelled ltr y
 
 cancelled (DR prf ltr) (DRSL x)
-  = (EQUAL _ _).Cancelled prf x
+  = (EQUAL _ _).Cancels prf x
 
 cancelled (DR prf ltr) (DRSLtr x y)
   = cancelled ltr y
@@ -155,13 +155,13 @@ cancelled' Stop DF (DSRLtr prf ltr) impossible
 cancelled' Stop DF (DRSLtr prf ltr) impossible
 
 cancelled' (Recv x that) (DS prf ltr) (DSRL y)
-  = (EQUAL _ _).Cancelled prf y
+  = (EQUAL _ _).Cancels prf y
 
 cancelled' (Recv x that) (DS prf ltr) (DSRLtr y z)
   = cancelled' that ltr z
 
 cancelled' (Send x that) (DR prf ltr) (DRSL y)
-  = (EQUAL _ _).Cancelled prf y
+  = (EQUAL _ _).Cancels prf y
 
 cancelled' (Send x that) (DR prf ltr) (DRSLtr y z)
   = cancelled' that ltr z

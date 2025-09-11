@@ -1,17 +1,13 @@
+||| Items in a Typing context.
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Examples.Context.Item
 
-import Data.Singleton
-
-import Data.List.Quantifiers
+import public Data.Singleton
 
 import Decidable.Positive
-import Decidable.Positive.Equality
-import Decidable.Positive.String
-import Decidable.Positive.Nat
-import Decidable.Positive.Pair
-import Decidable.Positive.List.Assoc
-import Decidable.Positive.List.Elem
-import Decidable.Positive.List
 
 public export
 data Item : type -> Type where
@@ -32,7 +28,7 @@ isVoidHK : HasKey         p  i
         -> HasKey (Swap . p) i
         -> Void
 isVoidHK {p = p} {i = I k v} (HK po) (HK ne)
-  = (p k).Cancelled po ne
+  = (p k).Cancels po ne
 
 public export
 HASKEY : (p    : String -> Decidable)
@@ -56,37 +52,35 @@ public export
 data Holds : {ty : kind}
           -> (pK   : (type : String) -> Decidable)
           -> (pI   : (type : kind)   -> Decidable)
-          -> (t    : Decidable -> Type)
           -> (item : Item ty)
                   -> Type
   where
-    H : (prfK : t (pK key))
-     -> (prfV : t (pV value))
-             -> Holds pK pV t (I key (Val value))
+    H : (prfK : Positive (pK key))
+     -> (prfV : Positive (pV value))
+             -> Holds pK pV (I key (Val value))
 
 public export
 data HoldsNot : {ty : kind}
              -> (pK   : (type : String) -> Decidable)
              -> (pI   : (type : kind)   -> Decidable)
-             -> (t    : Decidable -> Type)
              -> (item : Item ty)
                      -> Type
   where
-    WrongKey :(prfKey : t (pK key))
-                     -> HoldsNot pK pV t (I key (Val value))
+    WrongKey : (prfKey : Positive (pK key))
+                     -> HoldsNot pK pV (I key (Val value))
 
     WrongItem : {value : ty}
-             -> (prfValue : t (pV value))
-                         -> HoldsNot pK pV t (I key (Val value))
+             -> (prfValue : Positive (pV value))
+                         -> HoldsNot pK pV (I key (Val value))
 
 0
-isVoidU : Holds    pK pI Positive item
-       -> HoldsNot pK pI Negative item
+isVoidU : Holds    pK                  pI item
+       -> HoldsNot (Swap . pK) (Swap . pI) item
        -> Void
 isVoidU {pK = pK} {item = (I key (Val value))} (H prfK prfV) (WrongKey prfKey)
-  = (pK key).Cancelled prfK prfKey
+  = (pK key).Cancels prfK prfKey
 isVoidU {pI = pI} {item = (I key (Val value))} (H prfK prfV) (WrongItem prfValue)
-  = (pI value).Cancelled prfV prfValue
+  = (pI value).Cancels prfV prfValue
 
 public export
 HOLDS : (pK : (type : String) -> Decidable)
@@ -95,8 +89,8 @@ HOLDS : (pK : (type : String) -> Decidable)
      -> (item : Item ty)
      -> Decidable
 HOLDS p k i
-  = D (Holds    p k Positive i)
-      (HoldsNot p k Negative i)
+  = D (Holds            p          k  i)
+      (HoldsNot (Swap . p) (Swap . k) i)
       isVoidU
 
 export
@@ -105,10 +99,8 @@ holds : (f : (x : String) -> Positive.Dec (p x))
      -> (x : Item type)
           -> Positive.Dec (HOLDS p q x)
 holds f g (I k (Val v))
-  = either (Left . WrongKey)
-           (\pH => either (Left  . WrongItem)
-                          (Right . H pH)
-                          (g v))
-           (f k)
+  = do pK <- f k `otherwise` WrongKey
+       pI <- g v `otherwise` WrongItem
+       pure (H pK pI)
 
 -- [ EOF ]

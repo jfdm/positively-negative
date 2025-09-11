@@ -1,10 +1,12 @@
+||| A Filter Example
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Examples.Filter
 
 import Decidable.Positive
 import Decidable.Positive.Equality
-import Decidable.Positive.Nat
-import Decidable.Positive.List
-import Decidable.Positive.List.Elem
 import Decidable.Positive.List.Quantifier
 
 

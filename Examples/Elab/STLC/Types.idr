@@ -1,3 +1,8 @@
+||| STLC Types
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Examples.Elab.STLC.Types
 
 import Data.Either
@@ -141,7 +146,7 @@ ISFUNC ty = D (IsFunc ty) (IsNat ty) cancelled
 
 public export
 ISNAT : Ty -> Decidable
-ISNAT = Not . ISFUNC
+ISNAT = Swap . ISFUNC
 
 export
 isFunc : (ty : Ty) -> Dec (ISFUNC ty)

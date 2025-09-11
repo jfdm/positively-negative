@@ -1,3 +1,8 @@
+||| STLC and a Well-scoped elaboration.
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Examples.Elab.Razor
 
 import Data.Singleton
@@ -6,9 +11,6 @@ import Decidable.Positive
 import Decidable.Positive.So
 import Decidable.Positive.Equality
 import Decidable.Positive.String
-import Decidable.Positive.Nat
-import Decidable.Positive.Pair
-import Decidable.Positive.List.Assoc
 import Decidable.Positive.List.Elem
 import Decidable.Positive.List.Quantifier
 
@@ -79,11 +81,11 @@ Show (Razor ctxt) where
     = "(\{show x} + \{show y})"
 
 show : {s,x : String} -> (EQUALNOT s x).Positive -> String
-show {x} {s} (BinOpRes prf) = "Not Equal \{x} & \{s}"
+show {x} {s} (prf) = "Not Equal \{x} & \{s}"
 
 Show (Error xs) where
   show (Eek e) = show e
-  show (NotBound s prf) = "Not bound: \{s}\n\n Why:\n\n \{showAll (\p => show p) prf}"
+  show (NotBound s prf) = "Not bound: \{s}\n\n Why:\n\n \{showAll (\p => Razor.show p) prf}"
 
 export
 run : AST -> IO ()
