@@ -28,6 +28,7 @@ namespace Dependent
     NEGATIVE d
       = DPair (witness d) (Negative d)
 
+    public export
     POSITIVE : DDecidable -> Type
     POSITIVE d
       = DPair (witness d) (Positive d)

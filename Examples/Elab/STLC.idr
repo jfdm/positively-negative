@@ -90,8 +90,8 @@ namespace STLC
 
   synth ctxt (Var str)
     = do (loc ** prf) <- isBound str ctxt `otherwise` (NotBound str)
-         let (ty ** idx) = toIndex prf
-         pure (ty ** V loc idx)
+         let R val pf idx = toIndex prf
+         pure (_ ** V loc idx)
 
   synth ctxt (Func str ty expr)
     = case synth (I str (Val ty) :: ctxt) expr of

@@ -122,14 +122,30 @@ namespace Discover
     holdsAt f (x :: xs) | (Right yH)
       = Right (0 ** Here yH)
 
+
+public export
+data ToIndex : (item  : type -> Type)
+            -> (p     : {i : type} -> (x : item i) -> Decidable)
+            -> (xs    : All item is)
+            -> (n     : Nat)
+                     -> Type
+  where
+    R :  {0 p : {i : type} -> (x : item i) -> Decidable}
+      -> {i : type}
+      -> (x : item i)
+      -> (prf : Positive $ p x)
+      -> { is : All item xs}
+      -> AtIndex i xs idx
+      -> ToIndex item p is idx
+
 export
 toIndex : {is : All item xs}
          -> {0 p : {i : k} -> (x : item i) -> Decidable}
        -> HoldsAt item p is idx
-       -> (x ** AtIndex x xs idx)
-toIndex (Here prf) = (_ ** Z)
+       -> ToIndex item p is idx
+toIndex (Here prf) = (R _ prf  Z)
 toIndex (There tail) with (toIndex tail)
-  toIndex (There tail) | (x ** rest)
-    = (x ** S rest)
+  toIndex (There tail) | (R _ prf rest)
+    = (R _ prf (S rest))
 
 -- [ EOF ]
