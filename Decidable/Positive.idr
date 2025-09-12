@@ -21,6 +21,16 @@ record Decidable where
   Negative : Type
   0 Cancels : Positive -> Negative -> Void
 
+public export
+0
+POS : Decidable -> Type
+POS d = d.Positive
+
+public export
+0
+NEG : Decidable -> Type
+NEG d = d.Negative
+
 ||| Informs us how to `Show` the outputs of a decision.
 public export
 Show : Decidable -> Type

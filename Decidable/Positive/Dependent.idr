@@ -33,5 +33,15 @@ namespace Dependent
     POSITIVE d
       = DPair (witness d) (Positive d)
 
+    public export
+    NEG : DDecidable -> Type
+    NEG d
+      = DPair (witness d) (Negative d)
+
+    public export
+    POS : DDecidable -> Type
+    POS d
+      = DPair (witness d) (Positive d)
+
 
 -- [ EOF ]
