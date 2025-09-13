@@ -5,11 +5,11 @@ import public Decidable.Positive.Dependent
 import public Decidable.Positive.Equality
 import public Decidable.Positive.String
 
+import public Examples.SessionTypes.Common
 
 %default total
 
-data Action a = Send a (Action a)
-              | Recv a (Action a)
+data Action a = A CType a (Action a)
               | Stop
 
 --data Action : a -> Type where
@@ -25,145 +25,103 @@ data Dual : (a    : Type)
   where
     DF : Dual a pred Stop Stop
 
-    DS : {0 pred : a -> a -> Decidable}
+    DA : {0 pred : a -> a -> Decidable}
+      -> (  prf  : Positive (EQUALNOT i j))
       -> (  prf  : Positive (pred x y))
       -> (  ltr  : Dual a pred this that)
-                -> Dual a pred (Send x this)
-                               (Recv y that)
-
-    DR : {0 pred : a -> a -> Decidable}
-      -> (  prf  : Positive (pred x y))
-      -> (  ltr  : Dual a pred this that)
-                -> Dual a pred (Recv x this)
-                               (Send y that)
-
+                -> Dual a pred (A i x this)
+                               (A j y that)
 
 data DualNot : (a : Type)
             -> (pred : a -> a -> Decidable)
             -> (this, that : Action a)
             -> Type
   where
-    DFS : DualNot a neg Stop (Send x rest)
-    DSF : DualNot a neg (Send x rest) Stop
-    DFR : DualNot a neg Stop (Recv x rest)
-    DRF : DualNot a neg (Recv x rest) Stop
+    DFA : DualNot a p Stop (A c x rest)
 
-    DSS : DualNot a pred (Send x this) (Send y that)
-    DRR : DualNot a pred (Recv x this) (Recv y that)
+    DAF : DualNot a p (A c x rest) Stop
 
-    DSRL : (prf : Positive (pred x y))
-        -> DualNot a pred (Send x this) (Recv y that)
+    DAT : (prf : Positive (EQUAL x y))
+              -> DualNot a p (A x i this) (A y j that)
 
-    DRSL : (prf : Positive (pred x y))
-               -> DualNot a pred (Recv x this) (Send y that)
+    DAL : (prfL : Positive (EQUALNOT i j))
+       -> (prfT : Positive (p x y))
+               -> DualNot a p (A i x this) (A j y that)
 
-    DSRLtr : (prf : Negative (pred x y))
-          -> (ltr : DualNot a pred this that)
-                 -> DualNot a pred (Send x this) (Recv y that)
+    DAR : (prfL : Positive (EQUALNOT i j))
+       -> (prfT : Negative (p x y))
+        -> (ltr : DualNot a p this that)
+                -> DualNot a p (A i x this) (A j y that)
 
-    DRSLtr : (prf : Negative (pred x y))
-          -> (ltr : DualNot a pred this that)
-                 -> DualNot a pred (Recv x this) (Send y that)
 
 0
 cancelled : DecEQ a
-         => Dual    a EQUAL    this that
-         -> DualNot a EQUALNOT this that
+         => Dual    a         p  this that
+         -> DualNot a (\x,y => Swap $ p x y) this that
          -> Void
-cancelled DF DFS impossible
-cancelled DF DSF impossible
-cancelled DF DFR impossible
-cancelled DF DRF impossible
-cancelled DF DSS impossible
-cancelled DF DRR impossible
-cancelled DF (DSRL prf) impossible
-cancelled DF (DRSL prf) impossible
-cancelled DF (DSRLtr prf ltr) impossible
-cancelled DF (DRSLtr prf ltr) impossible
+cancelled DF DFA impossible
+cancelled DF DAF impossible
+cancelled DF (DAT prf) impossible
+cancelled DF (DAL prfL prfT) impossible
+cancelled DF (DAR prfL prfT ltr) impossible
 
-cancelled (DS prf ltr) (DSRL x)
-  = (EQUAL _ _).Cancels prf x
+cancelled {this=A i x l} {that=A j y m} (DA px _ _) (DAT py)
+  = (EQUALNOT i j).Cancels px py
+cancelled {this=A i x l} {that=A j y m} (DA _ px _) (DAL _ py)
+  = (p x y).Cancels px py
 
-cancelled (DS prf ltr) (DSRLtr x y)
-  = cancelled ltr y
+cancelled (DA _ _ x) (DAR _ _ y)
+  = cancelled x y
 
-cancelled (DR prf ltr) (DRSL x)
-  = (EQUAL _ _).Cancels prf x
 
-cancelled (DR prf ltr) (DRSLtr x y)
-  = cancelled ltr y
 
 DUAL : {a : Type} -> DecEQ a => (x,y : Action a) -> Decidable
 DUAL x y = D (Dual    _ EQUAL    x y)
              (DualNot _ EQUALNOT x y)
              cancelled
 
+
 areDual : DecEQ a
        => (x,y : Action a)
               -> Dec (DUAL x y)
-areDual (Send x z) (Recv y w) with (decEq x y)
-  areDual (Send x z) (Recv y w) | (Left err)
-    = Left (DSRL err)
-  areDual (Send x z) (Recv y w) | (Right v) with (areDual z w)
-    areDual (Send x z) (Recv y w) | (Right v) | (Left s)
-      = Left (DSRLtr v s)
-    areDual (Send x z) (Recv y w) | (Right v) | (Right s)
-      = Right (DS v s)
+areDual (A i x g) (A j y h)
+    = do pK <- decEqNot i j `otherwise` DAT
+         pT <- decEq x y `otherwise` (DAL pK)
+         pR <- areDual g h `otherwise` (DAR pK pT)
+         pure (DA pK pT pR)
 
-areDual (Recv x z) (Send y w) with (decEq x y)
-  areDual (Recv x z) (Send y w) | (Left v)
-    = Left (DRSL v)
-  areDual (Recv x z) (Send y w) | (Right v) with (areDual z w)
-    areDual (Recv x z) (Send y w) | (Right v) | (Left s)
-      = Left (DRSLtr v s)
-    areDual (Recv x z) (Send y w) | (Right v) | (Right s)
-      = Right (DR v s)
+areDual (A _ _ _) Stop
+  = Left DAF
 
-areDual (Send x z) (Send y w)
-  = Left DSS
-areDual (Send x z) Stop
-  = Left DSF
-areDual (Recv x z) (Recv y w)
-  = Left DRR
-areDual (Recv x z) Stop
-  = Left DRF
-areDual Stop (Send x y)
-  = Left DFS
-areDual Stop (Recv x y)
-  = Left DFR
+areDual Stop (A _ _ _)
+  = Left DFA
 areDual Stop Stop
   = Right DF
+
 
 namespace Discover
 
   0
   cancelled' : DecEQ a
            => (that : Action a)
-           -> Dual    a EQUAL    this that
-           -> DualNot a EQUALNOT this that
+           -> Dual    a p    this that
+           -> DualNot a (\x,y => Swap $ p x y) this that
            -> Void
-  cancelled' Stop DF DFS impossible
-  cancelled' Stop DF DSF impossible
-  cancelled' Stop DF DFR impossible
-  cancelled' Stop DF DRF impossible
-  cancelled' Stop DF DSS impossible
-  cancelled' Stop DF DRR impossible
-  cancelled' Stop DF (DSRL prf) impossible
-  cancelled' Stop DF (DRSL prf) impossible
-  cancelled' Stop DF (DSRLtr prf ltr) impossible
-  cancelled' Stop DF (DRSLtr prf ltr) impossible
+  cancelled' Stop DF DFA impossible
+  cancelled' Stop DF DAF impossible
+  cancelled' Stop DF (DAT prf) impossible
+  cancelled' Stop DF (DAL prfL prfT) impossible
+  cancelled' Stop DF (DAR prfL prfT ltr) impossible
 
-  cancelled' (Recv x that) (DS prf ltr) (DSRL y)
-    = (EQUAL _ _).Cancels prf y
+  cancelled' (A ty _ _) (DA prf _ _) (DAT y)
+    = (EQUAL _ ty).Cancels y prf
 
-  cancelled' (Recv x that) (DS prf ltr) (DSRLtr y z)
-    = cancelled' that ltr z
+  cancelled' (A _ x _) (DA _ y _) (DAL _ z)
+    = (p _ _).Cancels y z
 
-  cancelled' (Send x that) (DR prf ltr) (DRSL y)
-    = (EQUAL _ _).Cancels prf y
+  cancelled' (A _ _ x) (DA _ _ py) (DAR _ _ pn)
+    = cancelled' x py pn
 
-  cancelled' (Send x that) (DR prf ltr) (DRSLtr y z)
-    = cancelled' that ltr z
 
   public export
   DUAL : {a : Type} -> DecEQ a => (x : Action a) -> DDecidable
@@ -175,13 +133,13 @@ namespace Discover
   export
   computeDual : (x : Action String)
               -> POSITIVE (DUAL x)
-  computeDual (Send str ltr) with (computeDual ltr)
-    computeDual (Send str ltr) | (act ** rest)
-      = (Recv str act ** DS (refl str) rest)
+  computeDual (A SEND str ltr) with (computeDual ltr)
+    computeDual (A SEND str ltr) | (act ** rest)
+      = (A RECV str act ** DA SR (refl str) rest)
 
-  computeDual (Recv str ltr) with (computeDual ltr)
-    computeDual (Recv str ltr) | (act ** rest)
-      = (Send str act ** DR (refl str) rest)
+  computeDual (A RECV str ltr) with (computeDual ltr)
+    computeDual (A RECV str ltr) | (act ** rest)
+      = (A SEND str act ** DA RS (refl str) rest)
 
   computeDual Stop
     = (Stop ** DF)
