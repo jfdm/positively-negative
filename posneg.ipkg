@@ -3,6 +3,7 @@ package posneg
 modules = Decidable.Positive
         , Decidable.Positive.Dependent
         , Decidable.Positive.Equality
+        , Decidable.Positive.Order
 
         , Decidable.Positive.Builtin
         , Decidable.Positive.So
@@ -25,6 +26,7 @@ modules = Decidable.Positive
         , Decidable.Positive.All.AnyAt
 
         , Examples.Nat
+        , Examples.Order
         , Examples.Filter
         , Examples.Context.Item
         , Examples.Context

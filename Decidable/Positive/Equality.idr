@@ -37,6 +37,10 @@ namespace Positive
     ||| Values are equal to themselves.
     refl : (x : type) -> Positive (EQUAL x x)
 
+  public export
+  EQ : DecEQ type => (x,y : type) -> Decidable
+  EQ = EQUAL
+
   namespace Not
 
     ||| How to decide if things are not equal.
