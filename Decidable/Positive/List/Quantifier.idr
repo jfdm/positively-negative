@@ -95,6 +95,17 @@ ANY p xs
 
 --  = Swap (ALL (Swap . p) xs)
 
+ANY' : (p  : type -> Decidable)
+   -> (xs : List type)
+         -> Decidable
+ANY' p xs = Swap (ALL (Swap . p) xs)
+
+any' : {0 p : type -> Decidable}
+   -> (f  : (x : type) -> Positive.Dec (p x))
+   -> (xs : List type)
+         -> Positive.Dec (ANY' p xs)
+any' f xs = mirror (all (\x => mirror $ f x) xs)
+
 export
 any : {0 p : type -> Decidable}
    -> (f  : (x : type) -> Positive.Dec (p x))

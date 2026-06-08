@@ -27,6 +27,12 @@ modules = Decidable.Positive
 
         , Examples.Nat
         , Examples.Order
+        , Examples.Order.Nat
+        , Examples.Order.Pair
+        , Examples.Order.SecLevel
+        , Examples.Order.SQA
+        , Examples.Order.Offal
+
         , Examples.Filter
         , Examples.Context.Item
         , Examples.Context
