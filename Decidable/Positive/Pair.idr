@@ -7,7 +7,7 @@ module Decidable.Positive.Pair
 
 import public Decidable.Positive
 import public Decidable.Positive.Equality
-import Decidable.Positive.Nat
+
 %default total
 
 ||| Reasoning about the first element.
@@ -153,13 +153,14 @@ namespace Both
       -> (s : typeS -> Decidable)
       -> (p : Pair typeF typeS)
            -> Decidable
-  BOTH f s p
-    = D (Both            f          s  p)
-        (BothNot (Swap . f) (Swap . s) p)
+  BOTH f s (x,y)
+    = D (Both            f          s  (x,y))
+        (BothNot (Swap . f) (Swap . s) (x,y))
         no
 
   export
-  both : (f : (x : typeF) -> Positive.Dec (p x))
+  both : forall p,q
+       . (f : (x : typeF) -> Positive.Dec (p x))
       -> (g : (x : typeS) -> Positive.Dec (q x))
       -> (x : Pair typeF typeS)
            -> Positive.Dec (BOTH p q x)
@@ -180,7 +181,7 @@ namespace Both
          -> (p : Pair typeF typeS)
               -> Decidable
   BOTHNOT f s p
-    = Swap (BOTH f s p)
+    = Swap (BOTH (Swap . f) (Swap . s) p)
 
   export
   bothNot : (f : (x : typeF) -> Positive.Dec (p x))
@@ -188,6 +189,6 @@ namespace Both
          -> (x : Pair typeF typeS)
               -> Positive.Dec (BOTHNOT p q x)
   bothNot f g (x, y)
-    = mirror $ both f g (x,y)
+    = mirror $ both (\x => mirror $ f x) (\x => mirror $ g x) (x,y)
 
 -- [ EOF ]

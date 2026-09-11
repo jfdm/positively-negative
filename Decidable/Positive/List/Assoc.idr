@@ -9,7 +9,6 @@ import        Decidable.Positive
 import public Decidable.Positive.Dependent
 import public Decidable.Positive.Equality
 import public Decidable.Positive.Pair
-
 import public Decidable.Positive.List.Quantifier
 
 %default total
@@ -37,7 +36,9 @@ HOLDBOTH f s
   = ANY (BOTH f s)
 
 export
-holdBoth : (f   : (x : key)   -> Positive.Dec (k x))
+holdBoth : {0 k : key -> Decidable}
+        -> {0 v : value -> Decidable}
+        -> (f   : (x : key)   -> Positive.Dec (k x))
         -> (g   : (x : value) -> Positive.Dec (v x))
         -> (kvs : List (key,value))
                -> Positive.Dec (HOLDBOTH k v kvs)

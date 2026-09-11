@@ -12,7 +12,7 @@ import Decidable.Positive.Equality
 import Decidable.Positive.Order
 
 import Decidable.Positive.Pair
-import Decidable.Positive.Equality.Pair
+import Decidable.Positive.Pair.Equality
 
 ordIsRefl : {0 x : a}
          -> {0 y : b}
@@ -50,11 +50,11 @@ public export
   LTE (x,y) (i,j)
     = BOTH (LTE x) (LTE y) (i,j)
 
-  isRefl {a' = (x, y)} = ordIsRefl
+  isRefl {x = (x, y)} = ordIsRefl
 
-  isSymAnti {a'=(x,y)} {b'=(i,j)} pL pG = ordIsAntiSym pL pG
+  isSymAnti {x=(x,y)} {y=(i,j)} pL pG = ordIsAntiSym pL pG
 
-  isTrans {a'=(x,y)} {b'=(s,t)} {c=(i,j)} pA pB = ordIsTrans pA pB
+  isTrans {x=(x,y)} {y=(s,t)} {z=(i,j)} pA pB = ordIsTrans pA pB
 
   decLTE (x, y) (i,j) with (decLTE x i)
     decLTE (x, y) (i,j) | (Left fGT)

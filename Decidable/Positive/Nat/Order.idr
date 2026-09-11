@@ -3,7 +3,7 @@
 ||| Copyright : see COPYRIGHT
 ||| License   : see LICENSE
 |||
-module Decidable.Positive.Order.Nat
+module Decidable.Positive.Nat.Order
 
 import Data.Nat
 
