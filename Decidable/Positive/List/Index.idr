@@ -55,4 +55,17 @@ index (S k) (x :: xs)
            (Right . There)
            (index k xs)
 
+public export
+INDEXNOT : (n   : Nat)
+     -> (idx : List a)
+            -> Decidable
+INDEXNOT n idx
+  = Swap (INDEX n idx)
+
+export
+indexNot : (n   : Nat)
+        -> (idx : List a)
+               -> Positive.Dec (INDEXNOT n idx)
+indexNot n idx = mirror (index n idx)
+
 -- [ EOF ]

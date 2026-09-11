@@ -3,6 +3,7 @@ module Examples.SessionTypes.Binary.ChoiceNo
 import public Decidable.Positive
 import public Decidable.Positive.Dependent
 import public Decidable.Positive.Equality
+import public Decidable.Positive.Builtin.Equality
 import public Decidable.Positive.String
 
 import public Examples.SessionTypes.Common

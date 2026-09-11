@@ -18,19 +18,19 @@ namespace Postitive
 
       LTE : (x,y : type) -> Decidable
 
-      isRefl : {a   : type}
-            -> (prf : (LTE a a).Positive)
-                   -> (Equal a a)
+      isRefl : {0 x   : type}
+            -> (  prf : (LTE x x).Positive)
+                     -> Equal x x
 
-      isSymAnti : {a,b : type}
-               -> (prfLTE : (LTE a b).Positive)
-               -> (prfGTE : (LTE b a).Positive)
-                         -> (Equal a b)
+      isSymAnti : forall x, y
+                . (prfLTE : (LTE x y).Positive)
+               -> (prfGTE : (LTE y x).Positive)
+                         -> (Equal x y)
 
-      isTrans : {a,b,c : type}
-             -> (prfAB : (LTE a b  ).Positive)
-             -> (prfBC : (LTE   b c).Positive)
-                      -> (LTE a   c).Positive
+      isTrans : forall x,y,z
+              . (prfAB : (LTE x y  ).Positive)
+             -> (prfBC : (LTE   y z).Positive)
+                      -> (LTE x   z).Positive
 
       decLTE : (x,y : type) -> Positive.Dec (LTE x y)
 
@@ -64,7 +64,7 @@ namespace Postitive
               -> Positive.Dec (LT x y)
   decLT x y = mirror (decLTE y x)
 
-namespace Compare
+namespace Positive
   public export
   data Compare : (lt, eq : (x,y : type) -> Decidable)
               -> (a,b : type)
@@ -85,7 +85,7 @@ namespace Compare
       compare x y | (Left z) | (Left w) with (isSymAnti z w)
         compare x x | (Left z) | (Left w) | Refl = EQ (refl x)
 
-namespace MaxMin
+namespace Positive
   public export
   data Max : (lt,eq : (x,y : type) -> Decidable)
           -> (a,b,c : type) -> Type

@@ -11,7 +11,7 @@ import Decidable.Positive
 import Decidable.Positive.Equality
 import Decidable.Positive.Order
 import Decidable.Positive.Nat
-import Decidable.Positive.Equality.Nat
+import Decidable.Positive.Nat.Equality
 
 %default total
 

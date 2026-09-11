@@ -8,16 +8,14 @@ module Examples.Elab.Razor
 import Data.Singleton
 
 import Decidable.Positive
-import Decidable.Positive.So
+import Decidable.Positive.Bool
 import Decidable.Positive.Equality
+import Decidable.Positive.Builtin.Equality
 import Decidable.Positive.String
 import Decidable.Positive.List.Elem
 import Decidable.Positive.List.Quantifier
 
-
 %default total
-
-
 
 public export
 data AST = Var String
@@ -28,7 +26,7 @@ data AST = Var String
 public export
 data Razor : List String -> Type
   where
-    V : forall x, xs . Positive (ELEM x xs)
+    V : Positive (ELEM x xs)
      -> Razor xs
 
     L : Razor xs

@@ -6,7 +6,7 @@
 ||| Copyright : see COPYRIGHT
 ||| License   : see LICENSE
 |||
-module Decidable.Positive.So
+module Decidable.Positive.Bool
 
 import public Data.So
 import        Decidable.Positive
@@ -36,7 +36,7 @@ isTrue True  = Right Oh
 
 export
 isFalse : (b : Bool) -> Positive.Dec (OH b)
-isFalse b = mirror (So.isTrue b)
+isFalse b = mirror (Bool.isTrue b)
 
 ||| Some times we want things to be blocking.
 namespace Blocking

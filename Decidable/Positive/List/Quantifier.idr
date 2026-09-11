@@ -15,8 +15,8 @@ data All : (pred : (value : type) -> Decidable)
                 -> Type
   where
     Empty : All p Nil
-    Extend : {x    : type}
-          -> {0 p  : type -> Decidable}
+    Extend : forall p
+           . {x : type}
           -> (prf  : Positive (p x))
           -> (rest : All p     xs)
                   -> All p (x::xs)
@@ -27,20 +27,19 @@ data Any : (pred : (value : type) -> Decidable)
         -> (xs   : List type)
                 -> Type
   where
-    Here : {x   : type}
-        -> {0 p  : type -> Decidable}
+    Here : forall p
+         . {x    : type}
         -> (prf : Positive (p x))
                -> Any p (x::xs)
 
-    There : {x : type}
-         -> {0 p  : type -> Decidable}
+    There : forall p
+          . {x    : type}
          -> (prf : Negative (p x))
          -> (rest : Any p     xs)
                  -> Any p (x::xs)
 
 0
-prf : {xs : List type}
-   -> All p xs
+prf : All p xs
    -> Any (Swap . p) xs
    -> Void
 prf Empty (Here x) impossible
@@ -60,7 +59,7 @@ ALL p xs = D (All         p  xs)
 
 export
 all : (f  : (x : type) -> Positive.Dec (p x))
-     -> (xs : List type)
+   -> (xs : List type)
            -> Positive.Dec (ALL p xs)
 all f [] = Right Empty
 all f (x :: xs)
@@ -68,67 +67,23 @@ all f (x :: xs)
        pT <- (all f xs) `otherwise` (There pH)
        pure (Extend pH pT)
 
-0
-prf' : {xs : List type}
-   -> Any p xs
-   -> All (Swap . p) xs
-   -> Void
-prf' {xs = (x::xs)} (Here y) (Extend n _)
-  = (p x).Cancels y n
-
-prf' (There _ ly) (Extend _ ln)
-  = prf' ly ln
-
 public export
 ANY : (p  : type -> Decidable)
    -> (xs : List type)
          -> Decidable
-ANY p xs
-  = D (Any         p  xs)
-      (All (Swap . p) xs)
-      (prf')
-
--- [ NOTE ]
---
--- The nicer version has been removed as idris' elaborator
--- cannot go deep enough and resolve the swaps..
-
---  = Swap (ALL (Swap . p) xs)
-
-ANY' : (p  : type -> Decidable)
-   -> (xs : List type)
-         -> Decidable
-ANY' p xs = Swap (ALL (Swap . p) xs)
-
-any' : {0 p : type -> Decidable}
-   -> (f  : (x : type) -> Positive.Dec (p x))
-   -> (xs : List type)
-         -> Positive.Dec (ANY' p xs)
-any' f xs = mirror (all (\x => mirror $ f x) xs)
+ANY p xs = Swap (ALL (Swap . p) xs)
 
 export
 any : {0 p : type -> Decidable}
    -> (f  : (x : type) -> Positive.Dec (p x))
    -> (xs : List type)
          -> Positive.Dec (ANY p xs)
-any f []
-  = Left Empty
-any f (x :: xs)
-  = mirror
-  $ do nH <- (f x) `wiseother` Here
-       nT <- (Quantifier.any f xs) `wiseother` (There nH)
-       pure (Extend nH nT)
-
--- [ NOTE ]
---
--- ibid
-
---any f xs = mirror (all (\x => mirror $ f x) xs)
+any f xs = mirror (all (\x => mirror $ f x) xs)
 
 
 export
-showAll : (f : {x : _} -> Positive (p x) -> String)
-       -> All p xs
+showAll : (f : {x : type} -> Positive (p x) -> String)
+       -> Positive (ALL p xs)
        -> String
 showAll f Empty
   = "[]"
@@ -137,8 +92,8 @@ showAll f (Extend prf rest)
   = "(\{f prf} :: \{showAll f rest})"
 
 export
-showAny : (f : {x : _} -> Positive (p x) -> String)
-       -> (g : {x : _} -> Negative (p x) -> String)
+showAny : (f : {x : type} -> Positive (p x) -> String)
+       -> (g : {x : type} -> Negative (p x) -> String)
        -> Any p xs
        -> String
 showAny f g (Here prf)

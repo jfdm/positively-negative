@@ -3,7 +3,7 @@
 ||| Copyright : see COPYRIGHT
 ||| License   : see LICENSE
 |||
-module Examples.Elab.LSTLC
+module Examples.Elab.LRazor
 
 import Decidable.Positive
 import Decidable.Positive.Equality
@@ -373,13 +373,13 @@ exampleAST3
   $ Let "bar" (Var "foo")
   $ Add Z (Var "bar")
 
-exampleTm1 : STLC Nil NAT ?as
+exampleTm1 : STLC Nil NAT [I NAT USED, I BOOL FREE]
 exampleTm1
   = Let True
   $ Let Z
   $ Add Z (Var 0 Z Z Here)
 
-exampleTm2 : STLC Nil NAT ?catzt
+exampleTm2 : STLC Nil NAT [I NAT USED, I NAT USED, I BOOL FREE]
 exampleTm2
   = Let True
   $ Let Z
@@ -387,12 +387,4 @@ exampleTm2
   $ Add (Var 0 Z Z Here)
         (Var 1 (S Z) (S Z) (There Here))
 
-{-
-
-  export
-  elabShow : (ast : AST) -> String
-  elabShow ast = either show
-                        (const $ "yes")
-                        (elab ast)
--}
 -- [ EOF ]

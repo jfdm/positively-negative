@@ -25,23 +25,23 @@ namespace Relation
                    -> All p (x::xs)
 
   public export
-  data AllNot : (pred : (x,y : type) -> Decidable)
+  data Any : (pred : (x,y : type) -> Decidable)
              -> (xs   : List type)
                      -> Type
     where
       Here : {x : type}
           -> {0 p : (x,y : type) -> Decidable}
           -> (prf : Negative (ALL (p x) xs))
-                 -> AllNot p (x::xs)
+                 -> Any p (x::xs)
       There : {x : type}
            -> { 0 p : (x,y : type) -> Decidable}
            -> (head : Positive (ALL (p x) xs))
-           -> (tail : AllNot p     xs)
-                   -> AllNot p (x::xs)
+           -> (tail : Any p     xs)
+                   -> Any p (x::xs)
 
   0
   prf : All    p xs
-     -> AllNot p xs
+     -> Relation.Any p xs
      -> Void
   prf Empty (Here x) impossible
   prf Empty (There head tail) impossible
@@ -57,14 +57,14 @@ namespace Relation
            -> Decidable
   ALL p xs
     = D (All    p xs)
-        (AllNot p xs)
+        (Any p xs)
         (All.Relation.prf)
 
   public export
-  ALLNOT : (p  : (x,y : type) -> Decidable)
+  ANY : (p  : (x,y : type) -> Decidable)
         -> (xs : List type)
               -> Decidable
-  ALLNOT p xs
+  ANY p xs
     = Swap (ALL p xs)
 
   export
@@ -81,7 +81,7 @@ namespace Relation
   export
   any : (f  : (x,y : type) -> Positive.Dec (p x y))
            -> (xs : List type)
-                 -> Positive.Dec (Relation.ALLNOT p xs)
+                 -> Positive.Dec (Relation.ANY p xs)
   any f xs = mirror (all f xs)
 
 public export

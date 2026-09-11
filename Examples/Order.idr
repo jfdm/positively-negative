@@ -12,6 +12,7 @@ import Decidable.Positive.Equality
 import Decidable.Positive.Order
 
 import Decidable.Positive.Nat
+import Decidable.Positive.Nat.Equality
 
 namespace Nat
   natCan : Nat.LTE x y -> Nat.GT x y -> Void

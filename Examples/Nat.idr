@@ -51,19 +51,19 @@ namespace Main
          putStrLn (showANY {p = GT 3}
                            (\x => "(Yes \{show @{Helper} x})")
                            (\x => "(No \{show @{Helper} x})")
-                           (any (isGT 3) [1,2,3]))
+                           (any {p=GT 3} (isGT 3) [1,2,3]))
 
          putStrLn "## exists an x \in [4,5,6], 3 > x"
          putStrLn (showANY {p = GT 3}
                            (\x => "(Yes \{show @{Helper} x})")
                            (\x => "(No \{show @{Helper} x})")
-                           (any (isGT 3) [4,5,6]))
+                           (any {p=GT 3} (isGT 3) [4,5,6]))
 
          putStrLn "## exists an x \in [1,0,1], 3 > x"
          putStrLn (showANY {p = GT 3}
                            (\x => "(Yes \{show @{Helper} x})")
                            (\x => "(No \{show @{Helper} x})")
-                           (any (isGT 3) [1,0,1]))
+                           (any {p=GT 3}(isGT 3) [1,0,1]))
 
 
 -- [ EOF ]

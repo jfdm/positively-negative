@@ -52,7 +52,7 @@ namespace STLC
         where
           NotBound : {ctxt : Context Ty types}
                   -> (str : String)
-                  -> (prf : (NEGATIVE (ISBOUNDAT str ctxt)))
+                  -> (prf : (Negative (ISBOUND str ctxt)))
                          -> Error ctxt
           Next : Error (x :: xs) -> Error xs
           FuncExpected : (ty : Ty) -> Negative (ISFUNC ty) -> Error ctxt
@@ -89,9 +89,10 @@ namespace STLC
          pure tm
 
   synth ctxt (Var str)
-    = do (loc ** prf) <- isBound str ctxt `otherwise` (NotBound str)
-         let R val pf idx = toIndex prf
-         pure (_ ** V loc idx)
+    = do prf <- isBound str ctxt `otherwise` (NotBound str)
+         let (loc ** idx') = loc prf
+         let (ty  ** idx)  = deBruijn idx'
+         pure (ty ** V loc idx)
 
   synth ctxt (Func str ty expr)
     = case synth (I str (Val ty) :: ctxt) expr of

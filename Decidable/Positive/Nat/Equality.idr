@@ -47,8 +47,8 @@ DecEQ Nat where
     doCancel (Succ z) (MoreBoth w) = doCancel z w
 
 
-  toRefl = Nat.toRefl
-  toVoid = Nat.toVoid
+  toRefl = Equality.toRefl
+  toVoid = Equality.toVoid
 
   decEq 0 0
     = Right Zero

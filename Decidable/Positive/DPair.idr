@@ -1,3 +1,8 @@
+||| Reasoning about dependent pairs
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Decidable.Positive.DPair
 
 import Decidable.Equality
@@ -23,7 +28,7 @@ no : {p : {x : f} -> (value : s x) -> Decidable}
   -> OnSecond f s         p  (x ** y)
   -> OnSecond f s (Swap . p) (x ** y)
   -> Void
-no (Holds prf) (Holds n) = (p y).Cancelled prf n
+no (Holds prf) (Holds n) = (p y).Cancels prf n
 
 public export
 ONSECOND : (f : Type)
@@ -49,4 +54,22 @@ onSecond d (fst ** snd)
            (d snd)
 
 
+public export
+ONSECONDNOT : (f : Type)
+           -> {s : f -> Type}
+           -> (p : {x : f} -> s x -> Decidable)
+           -> DPair f s
+           -> Decidable
+ONSECONDNOT f p t
+  = Swap (ONSECOND f (Swap . p) t)
+
+export
+onSecondNot : {f : Type}
+        -> {s : f -> Type}
+        -> {p : {x : f} -> s x -> Decidable}
+        -> (d : forall x . (value : s x) -> Positive.Dec (p value))
+        -> (value : DPair f s)
+        -> Positive.Dec (ONSECONDNOT f p value)
+onSecondNot d t
+  = mirror (onSecond (\x => mirror $ d x) t)
 -- [ EOF ]

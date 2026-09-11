@@ -2,7 +2,7 @@ import public Data.So
 
 import Decidable.Positive
 
-import public Decidable.Positive.So
+import public Decidable.Positive.Bool
 import        Decidable.Positive.Equality
 
 

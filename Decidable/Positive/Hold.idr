@@ -1,3 +1,8 @@
+||| Reasoning about predicates
+|||
+||| Copyright : see COPYRIGHT
+||| License   : see LICENSE
+|||
 module Decidable.Positive.Hold
 
 import Decidable.Positive

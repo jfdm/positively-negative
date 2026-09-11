@@ -7,7 +7,7 @@ module Decidable.Positive.Pair
 
 import public Decidable.Positive
 import public Decidable.Positive.Equality
-
+import Decidable.Positive.Nat
 %default total
 
 ||| Reasoning about the first element.
@@ -18,46 +18,45 @@ namespace First
               -> (pair : (f,s))
                       -> Type
     where
-      H : {0 p : type_f -> Decidable}
-       -> (prf : Positive (p x))
+      H : forall p
+        . (prf : Positive (p x))
               -> OnFirst p (x,y)
 
-  0
-  no : OnFirst         p  x
-    -> OnFirst (Swap . p) x
+  %inline 0
+  no : OnFirst         p  (i,j)
+    -> OnFirst (Swap . p) (i,j)
     -> Void
-  no {x=(f,s)} (H pY) (H pN)
-    = (p f).Cancels pY pN
+  no {i} (H pY) (H pN)
+    = (p i).Cancels pY pN
+
 
   public export
-  ONFIRST : (p : f -> Decidable) -> (x : (f,s)) -> Decidable
-  ONFIRST p x
-    = D (OnFirst         p  x)
-        (OnFirst (Swap . p) x)
+  ONFIRST : (p : f -> Decidable) -> (t: (f,s)) -> Decidable
+  ONFIRST p (x,y)
+    = D (OnFirst         p  (x,y))
+        (OnFirst (Swap . p) (x,y))
         no
-    where
 
   export
-  onFirst : {0 p : type -> Decidable}
-         -> (f  : (x : type) -> Positive.Dec (p x))
-         -> (kv : (type,b))
-              -> Positive.Dec (ONFIRST p kv)
+  onFirst : (d  : (x : f) -> Positive.Dec (p x))
+         -> (fs : (f,s))
+              -> Positive.Dec (ONFIRST p fs)
   onFirst f (x,y)
     = either (Left  . H)
              (Right . H)
              (f x)
 
   public export
-  ONFIRSTNOT : (p : f -> Decidable) -> (x : (f,s)) -> Decidable
+  ONFIRSTNOT : (d : f -> Decidable) -> (x : (f,s)) -> Decidable
   ONFIRSTNOT p x
     = Swap (ONFIRST p x)
 
   export
-  onFirstNot : (f : (x : type) -> Positive.Dec (p x))
-            -> (x : (type,b))
+  onFirstNot : (d : (x : f) -> Positive.Dec (p x))
+            -> (x : (f,s))
                  -> Positive.Dec (ONFIRSTNOT p x)
   onFirstNot f (x, y)
-    = mirror (onFirst f (x,y))
+    = mirror $ onFirst f (x,y)
 
 namespace Second
   public export
@@ -65,11 +64,11 @@ namespace Second
                -> (pair : (f,s))
                        -> Type
     where
-      H : {0 p   : type_s -> Decidable}
-       -> (  prf : Positive (p s))
-                -> OnSecond p (f,s)
+      H : forall p
+        . (prf : Positive (p s))
+              -> OnSecond p (f,s)
 
-  0
+  %inline 0
   no : OnSecond         p  x
     -> OnSecond (Swap . p) x
     -> Void
@@ -95,14 +94,14 @@ namespace Second
   public export
   ONSECONDNOT : (p : s -> Decidable) -> (x : (f,s)) -> Decidable
   ONSECONDNOT p x
-    = Swap (ONSECOND p x)
+    = (ONSECOND (Swap . p) x)
 
   export
   onSecondNot : (f : (x : type) -> Positive.Dec (p x))
             -> (x : (a,type))
                  -> Positive.Dec (ONSECONDNOT p x)
   onSecondNot f (x, y)
-    = mirror (onSecond f (x,y))
+    = (onSecond (\x => mirror $ f x) (x,y))
 
 
 namespace Both
@@ -113,9 +112,8 @@ namespace Both
            -> (p : Pair typeF typeS)
                  -> Type
     where
-      B :      {0 f : ftype -> Decidable}
-    -> {0 s : stype -> Decidable}
-    -> (pF : Positive (f x))
+      B : forall f, s
+        . (pF : Positive (f x))
        -> (pS : Positive (s y))
              -> Both f s (x,y)
 
@@ -125,23 +123,20 @@ namespace Both
               -> (p : Pair typeF typeS)
                     -> Type
     where
-      FNot : {0 f : typeF -> Decidable}
-          -> (pF  : Positive (f x))
+      FNot : forall f
+           . (pF  : Positive (f x))
                  -> BothNot f s (x,y)
-      SNot : {0 s : typeF -> Decidable}
-          -> (pS  : Positive (s y))
+      SNot : forall s
+           . (pS  : Positive (s y))
                -> BothNot f s (x,y)
-      BNot : {0 f : ftype -> Decidable}
-          -> {0 s : stype -> Decidable}
-          -> (pF  : Positive (f x))
+      BNot : forall f, s
+           . (pF  : Positive (f x))
           -> (pS  : Positive (s y))
                  -> BothNot f s (x,y)
 
-  0
-  no : {0 p : Pair ftype stype}
-    -> {0 f : ftype -> Decidable}
-    -> {0 s : stype -> Decidable}
-    -> Both            f          s  p
+  %inline 0
+  no : forall p, f, s
+     . Both            f          s  p
     -> BothNot (Swap . f) (Swap . s) p
     -> Void
   no (B pFY pSY) (FNot pFN)
@@ -164,9 +159,7 @@ namespace Both
         no
 
   export
-  both : {0 p : typeF -> Decidable}
-      -> {0 q : typeS -> Decidable}
-      -> (f : (x : typeF) -> Positive.Dec (p x))
+  both : (f : (x : typeF) -> Positive.Dec (p x))
       -> (g : (x : typeS) -> Positive.Dec (q x))
       -> (x : Pair typeF typeS)
            -> Positive.Dec (BOTH p q x)
@@ -196,45 +189,5 @@ namespace Both
               -> Positive.Dec (BOTHNOT p q x)
   bothNot f g (x, y)
     = mirror $ both f g (x,y)
-
-namespace Equality
-
-  pairToRefl : {x,i : a}
-            -> {y,j : b}
-            -> (DecEQ a, DecEQ b)
-            => Both (EQ i) (EQ j) (x,y)
-            -> Equal (i,j) (x,y)
-  pairToRefl (B pF pS) with (toRefl pF)
-    pairToRefl (B pF pS) | Refl with (toRefl pS)
-      pairToRefl (B pF pS) | Refl | Refl = Refl
-
-  0
-  pairToVoid : {x,i : a}
-            -> {y,j : b}
-            -> (DecEQ a, DecEQ b)
-            => BothNot (Swap . EQ i) (Swap . EQ j) (x,y)
-            -> Equal (i,j) (x,y)
-            -> Void
-  pairToVoid (FNot pF) Refl = toVoid pF Refl
-  pairToVoid (SNot pS) Refl = toVoid pS Refl
-  pairToVoid (BNot pF pS) Refl = toVoid pF Refl
-
-  public export
-  (DecEQ a, DecEQ b) => DecEQ (a,b) where
-     EQUAL (x,y) (i,j)
-       = BOTH (EQ x) (EQ y) (i,j)
-
-     toRefl {x = (a, b)} {y = (i, j)} prf = pairToRefl prf
-     toVoid {x = (a, b)} {y = (a, b)} neg Refl = pairToVoid neg Refl
-
-     refl (x, y) = B (refl x) (refl y)
-
-     decEq (x, y) (i, j) with (decEq x i)
-       decEq (x, y) (i, j) | (Left prfNoF)
-         = Left (FNot prfNoF)
-       decEq (x, y) (i, j) | (Right prfF) with (decEq y j)
-         decEq (x, y) (i, j) | (Right prfF) | (Left prfNoR)
-           = Left (SNot prfNoR)
-         decEq (x, y) (i, j) | (Right prfF) | (Right prfR) = Right (B prfF prfR)
 
 -- [ EOF ]

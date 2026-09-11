@@ -6,14 +6,26 @@ modules = Decidable.Positive
         , Decidable.Positive.Order
 
         , Decidable.Positive.Builtin
-        , Decidable.Positive.So
+        , Decidable.Positive.Builtin.Equality
+        , Decidable.Positive.Builtin.Order
+
+        , Decidable.Positive.Bool
+        , Decidable.Positive.Bool.Equality
+        , Decidable.Positive.Bool.Order
+
         , Decidable.Positive.String
 
         , Decidable.Positive.Nat
+        , Decidable.Positive.Nat.Equality
+        , Decidable.Positive.Nat.Order
+
         , Decidable.Positive.Pair
+        , Decidable.Positive.Pair.Equality
+        , Decidable.Positive.Pair.Order
 
         , Decidable.Positive.List
 
+        , Decidable.Positive.List.Equality
         , Decidable.Positive.List.HasLength
         , Decidable.Positive.List.Quantifier
         , Decidable.Positive.List.HoldsAt
@@ -27,11 +39,8 @@ modules = Decidable.Positive
 
         , Examples.Nat
         , Examples.Order
-        , Examples.Order.Nat
-        , Examples.Order.Pair
         , Examples.Order.SecLevel
         , Examples.Order.SQA
-        , Examples.Order.Offal
 
         , Examples.Filter
         , Examples.Context.Item
@@ -40,6 +49,7 @@ modules = Decidable.Positive
         , Examples.Elab.STLC.Types
         , Examples.Elab.STLC
         , Examples.Elab.Razor
+        , Examples.Elab.LRazor
         , Examples.SessionTypes.Binary.ChoiceNo
 
         , Examples.Tree

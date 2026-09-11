@@ -14,7 +14,7 @@ import        Decidable.Positive
 import public Decidable.Positive.Equality
 import public Decidable.Positive.Order
 
-import public Decidable.Positive.So
+import public Decidable.Positive.Bool
 
 import public Decidable.Positive.Builtin
 import public Decidable.Positive.Builtin.Equality
